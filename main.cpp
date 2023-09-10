@@ -221,7 +221,7 @@ class Window {
 
             for (int i=0; i < height; i++) {
                 std::vector<Color> row;
-                for (int j=0; j < height; j++) {
+                for (int j=0; j < width; j++) {
                     row.push_back(Color(100,100,100));
                 }
                 windows_colors.push_back(row);
@@ -236,7 +236,10 @@ int render_picture(int n_rows, int n_cols, int window_width, int window_height) 
     std::vector<Sphere> objects;
     Window cretos_window(window_width, window_height, n_cols, n_rows, 0, 0, -10);
     
-    objects.push_back(Sphere(0, 0, -3000, 2998));
+    objects.push_back(Sphere(0, 0, -3000, 2600));
+    objects.push_back(Sphere(10000, 10000, -3000, 2600));
+    objects.push_back(Sphere(0, 10000, -3000, 2600));
+    objects.push_back(Sphere(10000, 0, -3000, 2600));
 
 
     // Initialize library
@@ -372,11 +375,8 @@ void tests() {
     Ray r(v,v2);
     cout << r << endl;
     cout << r.get_dr() << endl;
-
-    // std::cout << v < std::endl;
 }
 
 int main(int argc, char* argv[]) {
-    // tests();
-    return render_picture(700, 700, 700, 700);
+    return render_picture(700, 1200, 1200, 700);
 }
