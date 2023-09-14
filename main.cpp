@@ -6,32 +6,6 @@
 
 using namespace std;
 
-float max_in_vector(std::vector<float> v) {
-    float max = v[0];
-
-    for (auto& value : v) {
-        if (value > max) max = value; 
-    }
-    return max;
-}
-
-float min_in_vector(std::vector<float> v) {
-    float min = v[0];
-
-    for (auto& value : v) {
-        if (min > value) min = value; 
-    }
-    return min;
-}
-
-void print_vector(std::vector<float> v) {
-    std::cout << "[";
-    for (auto& value : v) {
-        std::cout << value << " ";
-    }
-    std::cout << "]\n";
-}
-
 class Color {
     public:
         uint8_t r; uint8_t g; uint8_t b;
@@ -45,25 +19,10 @@ class Color {
 
 class Vector3d;
 
-// A vector that works on SDL system
-class Vector3dSDL {
-    public:
-        float x; float y; float z;
-        Vector3dSDL() {}
-
-        Vector3dSDL(float x, float y, float z) {
-            this->x = x; this->y = y; this->z = z;
-        }
-        Vector3d to_creto_coord_system(int w_width, int w_height);
-};
 
 /*  Creto's system
     Window center is at (0, 0, -d)
     Observer is at (0, 0, 0)
-
-    SDL's system
-    Window center is at (window_width/2, window_height/2, -d)
-    observer is at (window_width/2, window_height/2, 0)
 */
 
 // A vector that works on Creto's coordinate system
@@ -76,7 +35,6 @@ class Vector3d {
             this->x = x; this->y = y; this->z = z;
         }
 
-        Vector3dSDL to_sdl_coord_system(int w_width, int w_height);
         Vector3d multiply(float value);
         Vector3d divide(float value);
         Vector3d sum(Vector3d v);
@@ -93,24 +51,6 @@ class Vector3d {
 
 std::ostream &operator<<(std::ostream &os, Vector3d const &v) {
     return os << "Vector(" << v.x << "," << v.y << "," << v.z << ")";
-}
-
-std::ostream &operator<<(std::ostream &os, Vector3dSDL const &v) {
-    return os << "VectorSDL(" << v.x << "," << v.y << "," << v.z << ")";
-}
-
-Vector3d Vector3dSDL::to_creto_coord_system(int w_width, int w_height) {
-    float new_x = this->x - w_width/2;
-    float new_y = -(this->y) + w_height/2;
-
-    return Vector3d(new_x, new_y, this->z);
-}
-
-Vector3dSDL Vector3d::to_sdl_coord_system(int w_width, int w_height) {
-    float new_x = this->x + w_width/2;
-    float new_y = -(this->y) + w_height/2;
-
-    return Vector3dSDL(new_x, new_y, this->z);
 }
 
 Vector3d Vector3d::multiply(float value) {
@@ -198,8 +138,8 @@ class Sphere {
 class Window {
     public:
         Vector3d center;
-        int width;
-        int height;
+        float width;
+        float height;
 
         int cols;
         int rows;
@@ -211,7 +151,7 @@ class Window {
         bool should_update = true;
 
         Window(){}
-        Window(int width, int height, int cols, int rows, float x, float y, float z) {
+        Window(float width, float height, int cols, int rows, float x, float y, float z) {
             this->width = width; this->height = height;
             this->cols = cols; this->rows = rows;
             this->center = Vector3d(x, y, z);
@@ -219,9 +159,9 @@ class Window {
             this->dx = width/(float) cols;
             this->dy = height/(float) rows;
 
-            for (int i=0; i < height; i++) {
+            for (int i=0; i < rows; i++) {
                 std::vector<Color> row;
-                for (int j=0; j < width; j++) {
+                for (int j=0; j < cols; j++) {
                     row.push_back(Color(100,100,100));
                 }
                 windows_colors.push_back(row);
@@ -230,16 +170,15 @@ class Window {
 };
 
 
-int render_picture(int n_rows, int n_cols, int window_width, int window_height) {
+int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height) {
 
     Vector3d origin(0, 0, 0);
     std::vector<Sphere> objects;
-    Window cretos_window(window_width, window_height, n_cols, n_rows, 0, 0, -10);
+    Window cretos_window(window_width, window_height, n_cols, n_rows, 0, 0, -1);
     
-    objects.push_back(Sphere(0, 0, -3000, 2600));
-    objects.push_back(Sphere(10000, 10000, -3000, 2600));
-    objects.push_back(Sphere(0, 10000, -3000, 2600));
-    objects.push_back(Sphere(10000, 0, -3000, 2600));
+    objects.push_back(Sphere(0, 0, -5, 0.5));
+    objects.push_back(Sphere(0, 1, -5, 0.5));
+    objects.push_back(Sphere(1, 0, -5, 0.5));
 
 
     // Initialize library
@@ -253,8 +192,8 @@ int render_picture(int n_rows, int n_cols, int window_width, int window_height) 
         "Computação Gráfica I - Bruno e Vitor",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        window_width,
-        window_height,
+        sdl_width,
+        sdl_height,
         SDL_WINDOW_SHOWN
     );
 
@@ -300,22 +239,12 @@ int render_picture(int n_rows, int n_cols, int window_width, int window_height) 
 
         // Just draw the colors saved in cretos_window.windows_colors
         if (!cretos_window.should_update) {
-            for (int l = 0; l < n_rows; l++) {
-                float y = cretos_window.height/2 - (cretos_window.dy/2) - (cretos_window.dy*l); // Creto's system
-                
+            for (int l = 0; l < n_rows; l++) {             
                 for (int c = 0; c < n_cols; c++) {
-                    float x = - cretos_window.width/2 + (cretos_window.dx/2) + (cretos_window.dx*c); // Creto's system
-
-                    center_of_small_rectangle->x = x;
-                    center_of_small_rectangle->y = y;
-                    center_of_small_rectangle->z = cretos_window.center.z;
-                    Vector3dSDL vecSDL = center_of_small_rectangle->to_sdl_coord_system(cretos_window.width, cretos_window.height);
-
-                    Color color = cretos_window.windows_colors[vecSDL.y][vecSDL.x];
+                    Color color = cretos_window.windows_colors[l][c];
                
-
                     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
-                    SDL_RenderDrawPoint(renderer, vecSDL.x, vecSDL.y);
+                    SDL_RenderDrawPoint(renderer, c, l);
                 }
             }
             // Lastly, we update the window with the renderer we just painted
@@ -337,19 +266,18 @@ int render_picture(int n_rows, int n_cols, int window_width, int window_height) 
                 ray->p1 = origin;
                 ray->p2 = *center_of_small_rectangle;
 
-                Vector3dSDL vecSDL = center_of_small_rectangle->to_sdl_coord_system(cretos_window.width, cretos_window.height);
-                cretos_window.windows_colors[vecSDL.y][vecSDL.x] = Color(100,100,100);
+                cretos_window.windows_colors[l][c] = Color(100,100,100);
 
                 for (auto& object : objects) {
                     if (object.intersected_by(*ray)) {
-                        cretos_window.windows_colors[vecSDL.y][vecSDL.x] = object.color;
+                        cretos_window.windows_colors[l][c] = object.color;
                     }
                 }
 
-                Color color = cretos_window.windows_colors[vecSDL.y][vecSDL.x];
+                Color color = cretos_window.windows_colors[l][c];
                
                 SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
-                SDL_RenderDrawPoint(renderer, vecSDL.x, vecSDL.y);
+                SDL_RenderDrawPoint(renderer, c, l);
             }
         }
 
@@ -378,5 +306,6 @@ void tests() {
 }
 
 int main(int argc, char* argv[]) {
-    return render_picture(700, 1200, 1200, 700);
+    // window width and height will be 1.0 meter. We will render everything in a SDL window with pixes specified.
+    return render_picture(700, 700, 700, 700, 1.0, 1.0);
 }
