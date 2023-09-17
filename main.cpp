@@ -1,10 +1,24 @@
 #include <SDL.h>
 #include <iostream>
 #include <vector>
+#include <tuple>
 #include <cmath>
 #include <sstream>
 
 using namespace std;
+
+// All sources of light will have this class with intensity colors in range of 0-1 (white will be -> 1.0, 1.0, 1.0)
+class IntensityColor {
+    public:
+        float r; float g; float b;
+        IntensityColor() {}
+        IntensityColor(uint8_t r, uint8_t g, uint8_t b) {
+            this->r = r/256.0;
+            this->g = g/256.0;
+            this->b = b/256.0;
+        }
+
+};
 
 class Color {
     public:
@@ -15,10 +29,17 @@ class Color {
             this->g = green;
             this->b = blue;
         }
+        IntensityColor to_color_normalized() {
+            return IntensityColor(this->r, this->g, this->b);
+        }
+
+        // Combines source intensity color with true color from object.
+        void arroba_multiply(IntensityColor intensity) {
+            this->r = (uint8_t) this->r * intensity.r;
+            this->g = (uint8_t) this->g * intensity.g;
+            this->b = (uint8_t) this->b * intensity.b;
+        }
 };
-
-class Vector3d;
-
 
 /*  Creto's system
     Window center is at (0, 0, -d)
@@ -47,7 +68,24 @@ class Vector3d {
         float scalar_product(Vector3d v) {
             return (this->x * v.x + this->y * v.y + this->z * v.z);
         }
+
+        Vector3d get_vector_normalized() {
+            return this->divide(this->size());
+        }
 };
+
+
+class SourceOfLight {
+    public:
+        IntensityColor intensity;
+        Vector3d center;
+        SourceOfLight(){}
+        SourceOfLight(Color color, Vector3d center) {
+            this->intensity = color.to_color_normalized();
+            this->center = center;
+        }
+};
+
 
 std::ostream &operator<<(std::ostream &os, Vector3d const &v) {
     return os << "Vector(" << v.x << "," << v.y << "," << v.z << ")";
@@ -101,11 +139,28 @@ std::ostream &operator<<(std::ostream &os, Ray const &r) {
     return os << "Ray(P1: " << r.p1 << " | P2: " << r.p2 << ")";
 }
 
-class Sphere {
+class Intersection {
+    public:
+        float time;
+        bool is_valid;
+
+        Intersection(){}
+        Intersection(float t, bool valid) {
+            this->time = t; this->is_valid = valid;
+        }
+};
+
+class Object {
+    public:
+        // bool intersected_by(Ray ray) {}
+        Color color;
+        virtual Intersection get_intersection(Ray ray) {return Intersection(0.0, false);}
+};
+
+class Sphere : public Object{
     public:
         Vector3d center;
         float radius;
-        Color color;
 
         Sphere(float x, float y, float z, float r) {
             Vector3d center(x,y,z);
@@ -114,7 +169,18 @@ class Sphere {
             this->color = Color(255, 0, 0);
         }
 
-        bool intersected_by(Ray ray) {
+        // n unitary vector (normal vector).
+        Vector3d get_normal_vector(Vector3d intersection_point) {
+            return (intersection_point.minus(this->center)).divide(this->radius);
+        }
+
+        // l unitary vector in direction to light.
+        Vector3d get_light_vector(Vector3d intersection_point, SourceOfLight source) {
+            return (source.center.minus(intersection_point)).get_vector_normalized();
+        }
+       
+        Intersection get_intersection(Ray ray) {
+
             Vector3d initial_point = ray.p2;
             Vector3d dr = ray.get_dr();
 
@@ -130,8 +196,55 @@ class Sphere {
             float c = w.scalar_product(w) - std::pow(this->radius, 2);
 
             float delta = std::pow(b, 2) - (4*a*c);
+            float t1 = (-b + std::sqrt(delta))/(2*a);
+            float t2 = (-b - std::sqrt(delta))/(2*a);
 
-            return delta >= 0; // The ray intersect the sphere in 2 points or in 1 point and we see sphere's color.
+            if (delta < 0) {
+                return Intersection(0.0, false);
+            }
+
+            Vector3d intersection_point;
+            if (t1 < t2) return Intersection(t1, true);
+            return Intersection(t2, true);
+        }
+};
+
+class Scene {
+    public:
+        std::vector<Object*> objects;
+        Color background_color;
+        SourceOfLight source_of_light;
+
+        Scene(Color bg_color, SourceOfLight source) {
+            this->background_color = bg_color;
+            this->source_of_light = source;
+        }
+
+        void push_object(Object *obj) {
+            objects.push_back(obj);
+        }
+
+        Color get_color_to_draw(Ray ray) {
+            float min_t = 10000000.0;
+            int min_index = -1;
+            for(int i=0; i < objects.size(); i++) {
+                Intersection intersection = objects[i]->get_intersection(ray);
+                if (intersection.is_valid) {
+                    if (intersection.time < min_t) {
+                        min_t = intersection.time;
+                        min_index = i;
+                    }
+                }
+            }
+
+            if (min_index == -1) return this->background_color;
+            return objects[min_index]->color;
+        }
+
+        void dealloc_objects() {
+            for (auto &obj : objects) {
+                delete obj;
+            }
         }
 };
 
@@ -173,12 +286,14 @@ class Window {
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height) {
 
     Vector3d origin(0, 0, 0);
-    std::vector<Sphere> objects;
-    Window cretos_window(window_width, window_height, n_cols, n_rows, 0, 0, -1);
-    
-    objects.push_back(Sphere(0, 0, -5, 0.5));
-    objects.push_back(Sphere(0, 1, -5, 0.5));
-    objects.push_back(Sphere(1, 0, -5, 0.5));
+    Window *cretos_window = new Window(window_width, window_height, n_cols, n_rows, 0, 0, -1);
+
+    SourceOfLight source_of_light(Color(255,255,255), Vector3d(0, 4, -1));
+    Scene scene(Color(100,100,100), source_of_light);
+
+    scene.push_object(new Sphere(0, 0, -5, 0.5));
+    scene.push_object(new Sphere(0, 1, -5, 0.5));
+    scene.push_object(new Sphere(1, 0, -5, 0.5));
 
 
     // Initialize library
@@ -223,12 +338,13 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 isRunning = false;
+                cretos_window->should_update = true;
             }
 
             if (event.type == SDL_KEYUP) {
-                cretos_window.center.z--; 
-                cout << cretos_window.center << endl;
-                cretos_window.should_update = true;
+                cretos_window->center.z--; 
+                cout << cretos_window->center << endl;
+                cretos_window->should_update = true;
             }
         }
 
@@ -237,11 +353,11 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 
-        // Just draw the colors saved in cretos_window.windows_colors
-        if (!cretos_window.should_update) {
+        // Just draw the colors saved in cretos_window->windows_colors
+        if (!cretos_window->should_update) {
             for (int l = 0; l < n_rows; l++) {             
                 for (int c = 0; c < n_cols; c++) {
-                    Color color = cretos_window.windows_colors[l][c];
+                    Color color = cretos_window->windows_colors[l][c];
                
                     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
                     SDL_RenderDrawPoint(renderer, c, l);
@@ -254,27 +370,22 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
         // By default, we will always use Creto's system to calculate, when we need to draw just transform to SDL system
         for (int l = 0; l < n_rows; l++) {
-            float y = cretos_window.height/2 - (cretos_window.dy/2) - (cretos_window.dy*l); // Creto's system
+            float y = cretos_window->height/2 - (cretos_window->dy/2) - (cretos_window->dy*l); // Creto's system
 
             for (int c = 0; c < n_cols; c++) {
-                float x = - cretos_window.width/2 + (cretos_window.dx/2) + (cretos_window.dx*c); // Creto's system
+                float x = - cretos_window->width/2 + (cretos_window->dx/2) + (cretos_window->dx*c); // Creto's system
 
                 center_of_small_rectangle->x = x;
                 center_of_small_rectangle->y = y;
-                center_of_small_rectangle->z = cretos_window.center.z;
+                center_of_small_rectangle->z = cretos_window->center.z;
 
                 ray->p1 = origin;
                 ray->p2 = *center_of_small_rectangle;
 
-                cretos_window.windows_colors[l][c] = Color(100,100,100);
 
-                for (auto& object : objects) {
-                    if (object.intersected_by(*ray)) {
-                        cretos_window.windows_colors[l][c] = object.color;
-                    }
-                }
+                cretos_window->windows_colors[l][c] = scene.get_color_to_draw(*ray);
 
-                Color color = cretos_window.windows_colors[l][c];
+                Color color = cretos_window->windows_colors[l][c];
                
                 SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
                 SDL_RenderDrawPoint(renderer, c, l);
@@ -283,15 +394,18 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
         // Lastly, we update the window with the renderer we just painted
         SDL_RenderPresent(renderer);
-        cretos_window.should_update = false;
+        cretos_window->should_update = false;
     }
 
     // Free the memory
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
+    scene.dealloc_objects();
     delete ray;
     delete center_of_small_rectangle;
+    delete cretos_window;
     return 0;
 }
 
