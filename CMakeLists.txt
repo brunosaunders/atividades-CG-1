@@ -1,12 +1,17 @@
-cmake_minimum_required(VERSION 3.26)
-project(creto)
+cmake_minimum_required(VERSION 3.13.0)
+set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_CXX_STANDARD 14)
+project(cenario LANGUAGES CXX)
 
-include_directories(include ../SDL/include)
+find_package(SDL2 REQUIRED)
 
-add_executable(creto
-        include/Color.hpp
-        color.cpp
-        main.cpp)
-add_compile_options(sdl2-config -cflags -libs)
+add_executable(${PROJECT_NAME} src/main.cpp) # replace 'main.cpp' with your actual main file
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
+
+# Include directories
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
+# Add subdirectories
+add_subdirectory(src)
+add_subdirectory(include)

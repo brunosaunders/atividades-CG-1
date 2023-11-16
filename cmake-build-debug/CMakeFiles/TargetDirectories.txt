@@ -1,3 +1,0 @@
-/home/brunosenasaunders/Documents/ufc/4_semestre/computação_gráfica_I/creto/cmake-build-debug/CMakeFiles/creto.dir
-/home/brunosenasaunders/Documents/ufc/4_semestre/computação_gráfica_I/creto/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/brunosenasaunders/Documents/ufc/4_semestre/computação_gráfica_I/creto/cmake-build-debug/CMakeFiles/rebuild_cache.dir
