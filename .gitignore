@@ -1,4 +1,6 @@
 SDL/
+build/
+build
 .vscode
 # Prerequisites
 *.d
