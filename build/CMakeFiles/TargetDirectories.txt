@@ -1,7 +1,0 @@
-/home/brunossaunders/Documentos/ufc/4_semestre/computacao_grafica_I/atividades-CG-1/build/CMakeFiles/cenario.dir
-/home/brunossaunders/Documentos/ufc/4_semestre/computacao_grafica_I/atividades-CG-1/build/CMakeFiles/edit_cache.dir
-/home/brunossaunders/Documentos/ufc/4_semestre/computacao_grafica_I/atividades-CG-1/build/CMakeFiles/rebuild_cache.dir
-/home/brunossaunders/Documentos/ufc/4_semestre/computacao_grafica_I/atividades-CG-1/build/src/CMakeFiles/edit_cache.dir
-/home/brunossaunders/Documentos/ufc/4_semestre/computacao_grafica_I/atividades-CG-1/build/src/CMakeFiles/rebuild_cache.dir
-/home/brunossaunders/Documentos/ufc/4_semestre/computacao_grafica_I/atividades-CG-1/build/include/CMakeFiles/edit_cache.dir
-/home/brunossaunders/Documentos/ufc/4_semestre/computacao_grafica_I/atividades-CG-1/build/include/CMakeFiles/rebuild_cache.dir

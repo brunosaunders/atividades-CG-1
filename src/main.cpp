@@ -1,4 +1,4 @@
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -428,7 +428,6 @@ public:
 
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height)
 {
-    std::cout << "eae\n";
     Vector3d eye(0, 0, 0);
     Window *cretos_window = new Window(window_width, window_height, n_cols, n_rows, 0, 0, -.3);
     float width_ratio = sdl_width / (float)n_cols;
@@ -469,13 +468,12 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     }
 
     SDL_Window *window = SDL_CreateWindow(
-        "Computação Gráfica I - Bruno e Vitor",
+        "Computação Gráfica I - Bruno e Guilherme",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         sdl_width,
         sdl_height,
         SDL_WINDOW_SHOWN);
-    SDL_Log("Criação da janela falhou! SDL_Error: %s", SDL_GetError());
 
     if (!window)
     {
@@ -502,8 +500,6 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
     while (isRunning)
     {
-        std::cout << "opa\n";
-
         // Event listening
         while (SDL_PollEvent(&event))
         {
@@ -551,8 +547,6 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
             for (int c = 0; c < n_cols; c++)
             {
-                std::cout << "eae2\n";
-
                 float x = -cretos_window->width / 2 + (cretos_window->dx / 2) + (cretos_window->dx * c); // Creto's system
 
                 center_of_small_rectangle->x = x;

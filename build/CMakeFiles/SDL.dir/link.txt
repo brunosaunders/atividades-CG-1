@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSDL.a 
-/usr/bin/ranlib libSDL.a
