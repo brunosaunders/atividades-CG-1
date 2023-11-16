@@ -7,7 +7,7 @@
 #include "Vector3d.hpp"
 
 
-namespace algebra {
+namespace atividades_cg_1::algebra {
 
     class Ray
     {
@@ -26,7 +26,17 @@ namespace algebra {
         // friend std::ostream& operator<<(std::ostream& os, const Ray& r);
     };
     
-    // std::ostream &operator<<(std::ostream &os, Ray const &r);
+    
+    
+    class Intersection
+    {
+    public:
+        float time;
+        bool is_valid;
+
+        Intersection() {}
+        Intersection(float t, bool valid) : time(t), is_valid(valid) {}
+    };
 }
 
 

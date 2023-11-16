@@ -8,7 +8,7 @@
     Window center is at (0, 0, -d)
     Observer is at (0, 0, 0)
 */
-namespace algebra {
+namespace atividades_cg_1::algebra {
 
     // A vector that works on Creto's coordinate system
     class Vector3d

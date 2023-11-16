@@ -1,13 +1,8 @@
 #include "Color.hpp"
 
 using namespace std;
+using namespace atividades_cg_1::color;
 
-Color::Color() = default;
-Color::Color(uint8_t red, uint8_t green, uint8_t blue) {
-    this->r = red;
-    this->g = green;
-    this->b = blue;
-}
 
 IntensityColor Color::to_color_normalized() const {
     return {this->r / (float)255, this->g / (float)255, this->b / (float)255};

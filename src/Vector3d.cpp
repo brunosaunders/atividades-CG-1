@@ -2,7 +2,7 @@
  
  #include "Vector3d.hpp"
 
-using namespace algebra;
+using namespace atividades_cg_1::algebra;
 
 Vector3d Vector3d::multiply(float value) {
     return Vector3d(this->x * value, this->y * value, this->z * value);
