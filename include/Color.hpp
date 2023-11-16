@@ -1,3 +1,6 @@
+#ifndef COLOR_H
+#define COLOR_H
+
 #include <iostream>
 #include <cstdint>
 class Color;
@@ -31,3 +34,5 @@ public:
     IntensityColor to_color_normalized() const;
     Color multiply(IntensityColor intensity) const;
 };
+
+#endif;

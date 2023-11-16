@@ -4,54 +4,12 @@
 #include <cmath>
 
 #include "Color.hpp"
+#include "Vector3d.hpp"
+#include "Ray.hpp"
 
 using namespace std;
 
-/*  Creto's system
-    Window center is at (0, 0, -d)
-    Observer is at (0, 0, 0)
-*/
-
-// A vector that works on Creto's coordinate system
-class Vector3d
-{
-public:
-    float x;
-    float y;
-    float z;
-
-    Vector3d() {}
-    Vector3d(float x, float y, float z)
-    {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-    }
-
-    Vector3d multiply(float value);
-    Vector3d divide(float value);
-    Vector3d sum(Vector3d v);
-    Vector3d minus(Vector3d v);
-
-    float size()
-    {
-        return sqrt(std::pow(this->x, 2) + std::pow(this->y, 2) + std::pow(this->z, 2));
-    }
-
-    float scalar_product(Vector3d v)
-    {
-        return (this->x * v.x + this->y * v.y + this->z * v.z);
-    }
-
-    Vector3d get_vector_normalized()
-    {
-        return this->divide(this->size());
-    }
-
-    bool equals(Vector3d other) {
-        return this->x == other.x && this->y == other.y && this->z == other.z;
-    }
-};
+using namespace algebra;
 
 class SourceOfLight
 {
@@ -71,68 +29,6 @@ public:
     }
 };
 
-std::ostream &operator<<(std::ostream &os, Vector3d const &v)
-{
-    return os << "Vector(" << v.x << "," << v.y << "," << v.z << ")";
-}
-
-Vector3d Vector3d::multiply(float value)
-{
-    float x = this->x * value;
-    float y = this->y * value;
-    float z = this->z * value;
-    return Vector3d(x, y, z);
-}
-
-Vector3d Vector3d::divide(float value)
-{
-    return this->multiply(1 / value);
-}
-
-Vector3d Vector3d::sum(Vector3d v)
-{
-    float x = this->x + v.x;
-    float y = this->y + v.y;
-    float z = this->z + v.z;
-    return Vector3d(x, y, z);
-}
-
-Vector3d Vector3d::minus(Vector3d v)
-{
-    Vector3d new_v = v.multiply(-1);
-    return this->sum(new_v);
-}
-
-class Ray
-{
-public:
-    Vector3d p1;
-    Vector3d p2;
-
-    Ray() {}
-
-    Ray(Vector3d p1, Vector3d p2)
-    {
-        this->p1 = p1;
-        this->p2 = p2;
-    }
-
-    float size()
-    {
-        return (p2.minus(p1)).size();
-    }
-
-    // Unitary direction vector
-    Vector3d get_dr()
-    {
-        return (p2.minus(p1)).divide(this->size());
-    }
-};
-
-std::ostream &operator<<(std::ostream &os, Ray const &r)
-{
-    return os << "Ray(P1: " << r.p1 << " | P2: " << r.p2 << ")";
-}
 
 class Intersection
 {
@@ -151,6 +47,7 @@ public:
 class Object
 {
 public:
+    virtual ~Object() {}
     // bool intersected_by(Ray ray) {}
     Color color;
     IntensityColor difuse_reflectivity;   // K_d
@@ -158,8 +55,8 @@ public:
     IntensityColor environment_reflectivity; // K_a
     float shininess;
     virtual Intersection get_intersection(Ray ray) { return Intersection(0.0, false); }
-    virtual Vector3d get_normal_vector(Vector3d intersection_point) {}
-    virtual Vector3d get_light_vector(Vector3d intersection_point, SourceOfLight source_of_light) {}
+    virtual Vector3d get_normal_vector(Vector3d intersection_point) { return Vector3d(20,20,20);};
+    virtual Vector3d get_light_vector(Vector3d intersection_point, SourceOfLight source_of_light) {return Vector3d(20,20,20); }
 
     IntensityColor get_difuse_contribution(Vector3d intersection_point, SourceOfLight source_of_light)
     {
@@ -512,7 +409,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
             if (event.type == SDL_KEYUP)
             {
                 cretos_window->center.z--;
-                cout << cretos_window->center << endl;
+                // cout << cretos_window->center << endl;
                 cretos_window->should_update = true;
             }
         }

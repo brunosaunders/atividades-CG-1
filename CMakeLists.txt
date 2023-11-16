@@ -6,16 +6,16 @@ project(cenario LANGUAGES CXX)
 
 # find_package(SDL2 REQUIRED)
 
-add_executable(${PROJECT_NAME} src/main.cpp) # replace 'main.cpp' with your actual main file
+add_executable(${PROJECT_NAME}) # replace 'main.cpp' with your actual main file
 # target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
 
 # Include directories
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
 # Add subdirectories
-add_subdirectory(src)
 add_subdirectory(include)
+add_subdirectory(src)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL2 REQUIRED sdl2)

@@ -4,6 +4,8 @@
 # add_subdirectory(ext)
 
 target_sources(${PROJECT_NAME} PRIVATE
-    color.cpp
+    Color.cpp
+    Vector3d.cpp
+    Ray.cpp
     main.cpp
 )
