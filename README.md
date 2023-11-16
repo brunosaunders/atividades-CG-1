@@ -1,2 +1,4 @@
 # atividades-CG-1
-- Esfera com iluminação ambiente
+
+Esse repositório tem como objetivo organizar todas as atividades da disciplina de Computação Gráfica I
+- Cada atividade estará versionada em branchs
