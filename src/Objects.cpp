@@ -109,3 +109,9 @@ Vector3d Triangle::get_normal_vector(Vector3d intersection_point) {
     return N.get_vector_normalized();
 }
 
+Intersection Triangle::get_intersection(Ray ray) {
+    Vector3d normal_vector = this->get_normal_vector(Vector3d());
+    float intersec_t = - ((ray.p1.minus(this->p1).scalar_product(normal_vector)) / ray.get_dr().scalar_product(normal_vector));
+
+    // TODO: check if intersection is valid.
+}
