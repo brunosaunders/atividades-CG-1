@@ -113,5 +113,17 @@ Intersection Triangle::get_intersection(Ray ray) {
     Vector3d normal_vector = this->get_normal_vector(Vector3d());
     float intersec_t = - ((ray.p1.minus(this->p1).scalar_product(normal_vector)) / ray.get_dr().scalar_product(normal_vector));
 
+    Vector3d intersec_point = ray.p1.sum(ray.get_dr().multiply(intersec_t));
+    float total_area = this->p1.vectorial_product(this->p2).scalar_product(normal_vector);
+
+    float c1 = (this->p3.minus(intersec_point).vectorial_product(this->p1.minus(intersec_point))).scalar_product(normal_vector) / total_area;
+    float c2 = (this->p1.minus(intersec_point).vectorial_product(this->p2.minus(intersec_point))).scalar_product(normal_vector) / total_area;
+    float c3 = 1 - c1 - c2;
+
+    if (c1 < 0 || c2 < 0 || c3 < 0 || c1 + c2 + c3 != 1 ) {
+        return Intersection(intersec_t, false);
+    }
+    
+    return Intersection(intersec_t, true);
     // TODO: check if intersection is valid.
 }
