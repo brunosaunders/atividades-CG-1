@@ -174,8 +174,23 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     return 0;
 }
 
+
+void test_vectorial_product() {
+    Vector3d v1(2,0,5);
+    Vector3d v2(1, 1, 8);
+
+    Vector3d result(-5, -11, 2);
+    if (!result.equals(v1.vectorial_product(v2))) {
+        throw logic_error("vectorial_product failed");
+    }
+}
+void run_tests() {
+    test_vectorial_product();
+}
+
 int main(int argc, char *argv[])
 {
     // window width and height will be 1.0 meter. We will render everything in a SDL window with pixes specified.
+    run_tests();
     return render_picture(500, 500, 500, 500, .6, .6);
 }

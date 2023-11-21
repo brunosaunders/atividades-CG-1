@@ -33,6 +33,13 @@ float Vector3d::scalar_product(Vector3d v)
     return (this->x * v.x + this->y * v.y + this->z * v.z);
 }
 
+Vector3d Vector3d::vectorial_product(Vector3d other) {
+    float new_x = this->y * other.z - this->z * other.y;
+    float new_y = this->z * other.x - this->x * other.z;
+    float new_z = this->x * other.y - this->y * other.x;
+    return Vector3d(new_x, new_y, new_z);
+}
+
 Vector3d Vector3d::get_vector_normalized()
 {
     return this->divide(this->size());
@@ -41,8 +48,3 @@ Vector3d Vector3d::get_vector_normalized()
 bool Vector3d::equals(Vector3d other) {
     return this->x == other.x && this->y == other.y && this->z == other.z;
 }
-
-// std::ostream &operator<<(std::ostream &os, Vector3d const &v)
-// {
-//     return os << "Vector(" << v.x << "," << v.y << "," << v.z << ")";
-// }
