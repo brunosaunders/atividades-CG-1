@@ -29,6 +29,7 @@ namespace atividades_cg_1::algebra {
         float size();
 
         float scalar_product(Vector3d v);
+        Vector3d vectorial_product(Vector3d v);
 
         Vector3d get_vector_normalized();
 
