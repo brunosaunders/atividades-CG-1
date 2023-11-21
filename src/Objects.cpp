@@ -103,3 +103,9 @@ Intersection Plan::get_intersection(Ray ray) {
     return Intersection(t_int, t_int > 0);
 }
 
+// We can pass any value of interserction_point
+Vector3d Triangle::get_normal_vector(Vector3d intersection_point) {
+    Vector3d N = this->p1.vectorial_product(this->p2); // r1 x r2
+    return N.get_vector_normalized();
+}
+

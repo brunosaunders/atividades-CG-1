@@ -67,6 +67,24 @@ namespace atividades_cg_1::objects {
 
         Intersection get_intersection(Ray ray) override ;
     };
+
+    class Triangle : public Object {
+        private:
+            Vector3d p1;
+            Vector3d p2;
+            Vector3d p3;
+
+        public:
+            Triangle(Vector3d p1, Vector3d p2, 
+            Vector3d p3, Color color, 
+            IntensityColor dr, IntensityColor sr,
+            IntensityColor er, float shininess) : p1(p1), p2(p2), p3(p3), Object(color,dr, sr, er, shininess) {}
+
+            Vector3d get_normal_vector(Vector3d intersection_point) override;
+            Vector3d get_light_vector(Vector3d intersection_point, SourceOfLight source_of_light) override;
+
+            Intersection get_intersection(Ray ray) override;
+    };
 }
 
 #endif
