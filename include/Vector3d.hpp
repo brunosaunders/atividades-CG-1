@@ -35,6 +35,8 @@ namespace atividades_cg_1::algebra {
 
         bool equals(Vector3d other);
 
+        void print();
+
         // friend std::ostream& operator<<(std::ostream& os, const Vector3d& v);
 
     };
