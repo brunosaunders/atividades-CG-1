@@ -51,6 +51,8 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
 
+    scene.push_object(new Triangle(Vector3d(-0.9, 0, -1), Vector3d(0.9, 0, -1), Vector3d(0, .9,-1)));
+
 
     // Initialize library
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -103,7 +105,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
             if (event.type == SDL_KEYUP)
             {
-                cretos_window->center.z--;
+                cretos_window->center.z += 0.05;
                 // cout << cretos_window->center << endl;
                 cretos_window->should_update = true;
             }

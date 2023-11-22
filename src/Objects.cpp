@@ -40,6 +40,11 @@ IntensityColor Object::get_specular_contribution(Vector3d intersection_point, Ve
     return contribution;
 }
 
+Vector3d Object::get_light_vector(Vector3d intersection_point, SourceOfLight source)
+{
+    return (source.center.minus(intersection_point)).get_vector_normalized();
+}
+
 // Sphere
     // n unitary vector (normal vector).
 Vector3d Sphere::get_normal_vector(Vector3d intersection_point)
@@ -47,11 +52,6 @@ Vector3d Sphere::get_normal_vector(Vector3d intersection_point)
     return (intersection_point.minus(this->center)).divide(this->radius);
 }
 
-// l unitary vector in direction to light.
-Vector3d Sphere::get_light_vector(Vector3d intersection_point, SourceOfLight source)
-{
-    return (source.center.minus(intersection_point)).get_vector_normalized();
-}
 
 Intersection Sphere::get_intersection(Ray ray)
 {
@@ -89,13 +89,10 @@ Intersection Sphere::get_intersection(Ray ray)
 Vector3d Plan::get_normal_vector(Vector3d intersection_point) {
     return this->normal.get_vector_normalized();
 }
-Vector3d Plan::get_light_vector(Vector3d intersection_point, SourceOfLight source_of_light) {
-    return source_of_light.center.minus(intersection_point).get_vector_normalized();
-}
+
 
 Intersection Plan::get_intersection(Ray ray) {
     Vector3d w = ray.p1.minus(this->known_point);
-//        Vector3d w = this->known_point.minus(ray.p2);
     Vector3d dr = ray.get_dr();
 
     float t_int = -(this->normal.scalar_product(w))/(this->normal.scalar_product(dr));
@@ -103,3 +100,30 @@ Intersection Plan::get_intersection(Ray ray) {
     return Intersection(t_int, t_int > 0);
 }
 
+// We can pass any value of interserction_point
+Vector3d Triangle::get_normal_vector(Vector3d intersection_point = Vector3d(0,0,0)) {
+    Vector3d N = this->r1.vectorial_product(this->r2); // r1 x r2
+    return N.get_vector_normalized();
+}
+
+
+Intersection Triangle::get_intersection(Ray ray) {
+    Vector3d normal_vector = this->get_normal_vector();
+    float intersec_t = - ((ray.p1.minus(this->p1).scalar_product(normal_vector)) / ray.get_dr().scalar_product(normal_vector));
+    
+    if (intersec_t == INFINITY || intersec_t == NAN)  {
+        throw std::logic_error("Intersec time is invalid (inf or nan).");
+    }
+
+    Vector3d intersec_point = ray.p1.sum(ray.get_dr().multiply(intersec_t));
+    float total_area = this->p1.vectorial_product(this->p2).scalar_product(normal_vector);
+
+    float c1 = (this->p3.minus(intersec_point).vectorial_product(this->p1.minus(intersec_point))).scalar_product(normal_vector) / total_area;
+    float c2 = (this->p1.minus(intersec_point).vectorial_product(this->p2.minus(intersec_point))).scalar_product(normal_vector) / total_area;
+    float c3 = (this->p2.minus(intersec_point).vectorial_product(this->p3.minus(intersec_point))).scalar_product(normal_vector) / total_area;
+    if (c1 < 0 || c2 < 0 || c3 < 0 ) {
+        return Intersection(intersec_t, false);
+    }
+ 
+    return Intersection(intersec_t, true);
+}
