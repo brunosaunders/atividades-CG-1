@@ -42,9 +42,8 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     IntensityColor back_plan_k_difuse = IntensityColor(.3, .3, .7);
     IntensityColor back_plan_k_specular = IntensityColor(0, 0, 0);
     IntensityColor back_plan_k_environment = IntensityColor(.3, .3, .7);
-
-    MatrixTransformations transformations;
-    transformations.translation(0.1, 0.1, 0);
+    
+    Matrix translation_matrix = MatrixTransformations::translation(0.1, 0.1, 0);
     
     Plan *floor_plan = new Plan(Vector3d(0, sphere_radius*(-1), 0), Vector3d(0, 1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
     Plan *back_plan = new Plan(Vector3d(0, 0, -2), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
@@ -53,7 +52,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
 
-    sphere->apply_transformation(transformations.matrix);
+    sphere->apply_transformation(translation_matrix);
 
     // scene.push_object(new Triangle(Vector3d(-0.9, 0, -1), Vector3d(0.9, 0, -1), Vector3d(0, .9,-1)));
 
@@ -109,7 +108,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
             if (event.type == SDL_KEYUP)
             { 
-                sphere->apply_transformation(transformations.matrix);
+                sphere->apply_transformation(translation_matrix);
                 // cretos_window->center.z += 0.05;
                 // cout << cretos_window->center << endl;
                 cretos_window->should_update = true;

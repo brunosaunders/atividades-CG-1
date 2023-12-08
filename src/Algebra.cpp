@@ -199,12 +199,12 @@ bool MatrixDimension::can_multiply(MatrixDimension other) {
 }
 
 
-void MatrixTransformations::translation(float tx, float ty, float tz) {
+Matrix MatrixTransformations::translation(float tx, float ty, float tz) {
     vector<vector<float>> result{vector<float>{1,0,0,tx}, vector<float>{0,1,0,ty}, vector<float>{0,0,1,tz}, vector<float>{0,0,0,1}};
-    this->matrix = Matrix(result);
+    return Matrix(result);
 }
 
 
-Vector3d MatrixTransformations::apply(Vector3d v) {
-    return this->matrix.multiply(v.as_matrix()).as_vector();
-}
+// Vector3d MatrixTransformations::apply(Vector3d v) {
+//     return this->matrix.multiply(v.as_matrix()).as_vector();
+// }

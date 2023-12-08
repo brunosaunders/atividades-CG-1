@@ -109,12 +109,7 @@ namespace atividades_cg_1::algebra {
 
     class MatrixTransformations {
         public:
-            Matrix matrix;
-            void translation(float tx, float ty, float tz);
-
-            Vector3d apply(Vector3d v);
-
-            MatrixTransformations() {}
+            static Matrix translation(float tx, float ty, float tz);
     };
 
 
