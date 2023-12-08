@@ -7,7 +7,7 @@
 using namespace std;
 
 namespace atividades_cg_1::algebra {
-
+    class Vector3d;
     class MatrixDimension {
         public:
             int n;
@@ -25,6 +25,7 @@ namespace atividades_cg_1::algebra {
             vector<vector<float>> matrix;
             MatrixDimension dimension;
 
+            Matrix() {}
             Matrix(vector<vector<float>> m) : matrix(m) {
                 MatrixDimension dimension = MatrixDimension(m.size(), m[0].size());
                 this->dimension = dimension;
@@ -37,9 +38,12 @@ namespace atividades_cg_1::algebra {
 
             Matrix multiply_scalar(float v);
             Matrix divide_scalar(float v);
+
+            Vector3d as_vector();
+            void print();
     };
-    
-    
+
+
     class Intersection
     {
     public:
@@ -60,7 +64,7 @@ namespace atividades_cg_1::algebra {
         int8_t is_point;
 
         Vector3d() {}
-        Vector3d(float x, float y, float z, bool is_point = 0) : x(x), y(y), z(z), is_point(is_point) {}
+        Vector3d(float x, float y, float z, bool is_point = 1) : x(x), y(y), z(z), is_point(is_point) {}
 
         Vector3d multiply(float value);
         Vector3d divide(float value);
@@ -75,7 +79,10 @@ namespace atividades_cg_1::algebra {
         Vector3d get_vector_normalized();
 
         bool equals(Vector3d other);
+        Matrix as_matrix();
 
+        Vector3d apply_transformation(Matrix transformation);
+        
         void print();
 
         // friend std::ostream& operator<<(std::ostream& os, const Vector3d& v);
@@ -99,6 +106,23 @@ namespace atividades_cg_1::algebra {
         Vector3d get_dr(); 
         // friend std::ostream& operator<<(std::ostream& os, const Ray& r);
     };
+
+    class MatrixTransformations {
+        public:
+            Matrix matrix;
+            void translation(float tx, float ty, float tz);
+
+            Vector3d apply(Vector3d v);
+
+            MatrixTransformations() {}
+    };
+
+
+    // class ApplyTransformation {
+    //     public:
+    //         static Matrix translation(Vector3d v, float tx, float ty, float tz);
+    // };
+
 }
 
 #endif

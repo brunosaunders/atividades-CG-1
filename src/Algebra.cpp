@@ -68,6 +68,17 @@ bool Vector3d::equals(Vector3d other) {
 }
 
 
+Matrix Vector3d::as_matrix() {
+    vector<vector<float>> result(4, vector<float>(1, 0));
+    result[0][0] = this->x;
+    result[1][0] = this->y;
+    result[2][0] = this->z;
+    result[3][0] = this->is_point;
+
+    return Matrix(result);
+}
+
+
 float Ray::size()
 {
     return (p2.minus(p1)).size();
@@ -136,21 +147,47 @@ Matrix Matrix::multiply(Matrix other) {
     int n = this->dimension.n;
     int m = other.dimension.m;
 
-    vector<vector<float>> result(n, vector<float>(m, 0));
+    // vector<vector<float>> result(n, vector<float>(m, 0));
+    vector<vector<float>> result;
 
     for (int i = 0; i < n; i++) { 
-        for (int j = 0; j < m; j++) { 
-            result[i][j] = 0; 
+        vector<float> row;
+        for (int j = 0; j < m; j++) {
+            // row.push_back(0);
+            // result[i][j] = 0; 
+            float acc = 0; 
   
             for (int k = 0; k < other.dimension.n; k++) { 
-                result[i][j] += this->matrix[i][k] * other.matrix[k][j]; 
+                acc += this->matrix[i][k] * other.matrix[k][j]; 
             } 
+            row.push_back(acc);
         } 
+        result.push_back(row);
     }
 
     return Matrix(result);
 }
 
+Vector3d Matrix::as_vector() {
+    if (this->dimension.m == 1 && this->dimension.n == 4) {
+        return Vector3d(this->matrix[0][0], this->matrix[1][0], this->matrix[2][0], this->matrix[3][0]);
+    }
+    throw domain_error("A matriz não pode ser convertida para vetor.");
+}
+
+void Matrix::print() {
+    for (auto& row : this->matrix) {
+        for (auto& item : row) {
+            cout << item << " ";
+        }
+        cout << endl;
+    }
+}
+
+
+Vector3d Vector3d::apply_transformation(Matrix transformation) {
+    return transformation.multiply(this->as_matrix()).as_vector();
+}
 
 bool MatrixDimension::equals(MatrixDimension other) {
     return (this->n == other.n && this->m == other.m);
@@ -159,4 +196,15 @@ bool MatrixDimension::equals(MatrixDimension other) {
 
 bool MatrixDimension::can_multiply(MatrixDimension other) {
     return (this->m == other.n);
+}
+
+
+void MatrixTransformations::translation(float tx, float ty, float tz) {
+    vector<vector<float>> result{vector<float>{1,0,0,tx}, vector<float>{0,1,0,ty}, vector<float>{0,0,1,tz}, vector<float>{0,0,0,1}};
+    this->matrix = Matrix(result);
+}
+
+
+Vector3d MatrixTransformations::apply(Vector3d v) {
+    return this->matrix.multiply(v.as_matrix()).as_vector();
 }

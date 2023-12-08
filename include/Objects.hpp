@@ -24,6 +24,8 @@ namespace atividades_cg_1::objects {
         IntensityColor specular_reflectivity; // K_e
         IntensityColor environment_reflectivity; // K_a
         float shininess;
+
+        virtual void apply_transformation(Matrix transformation) {};
         virtual Intersection get_intersection(Ray ray) { return Intersection(0.0, false); }
         virtual Vector3d get_normal_vector(Vector3d intersection_point) { return Vector3d(20,20,20);};
         Vector3d get_light_vector(Vector3d intersection_point, SourceOfLight source_of_light);
@@ -47,6 +49,8 @@ namespace atividades_cg_1::objects {
         Vector3d get_normal_vector(Vector3d intersection_point) override;
 
         Intersection get_intersection(Ray ray) override;
+
+        void apply_transformation(Matrix transformation) override;
     };
 
     class Plan: public Object {
@@ -59,12 +63,13 @@ namespace atividades_cg_1::objects {
         : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), known_point(known_point), normal(normal) {}
 
         Vector3d get_normal_vector(Vector3d intersection_point) override;
+        void apply_transformation(Matrix transformation) override;
 
         Intersection get_intersection(Ray ray) override ;
     };
 
     class Triangle : public Object {
-        private:
+        protected:
             Vector3d p1;
             Vector3d p2;
             Vector3d p3;
@@ -83,6 +88,7 @@ namespace atividades_cg_1::objects {
 
             Vector3d get_normal_vector(Vector3d intersection_point) override;
 
+            void apply_transformation(Matrix transformation) override;
 
             Intersection get_intersection(Ray ray) override;
     };

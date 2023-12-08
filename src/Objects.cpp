@@ -26,6 +26,7 @@ IntensityColor Object::get_difuse_contribution(Vector3d intersection_point, Sour
         return contribution;
     }
 
+
 IntensityColor Object::get_specular_contribution(Vector3d intersection_point, Vector3d eye_point, SourceOfLight source_of_light)
 {
     Vector3d l = this->get_light_vector(intersection_point, source_of_light);
@@ -40,16 +41,23 @@ IntensityColor Object::get_specular_contribution(Vector3d intersection_point, Ve
     return contribution;
 }
 
+
 Vector3d Object::get_light_vector(Vector3d intersection_point, SourceOfLight source)
 {
     return (source.center.minus(intersection_point)).get_vector_normalized();
 }
+
 
 // Sphere
     // n unitary vector (normal vector).
 Vector3d Sphere::get_normal_vector(Vector3d intersection_point)
 {
     return (intersection_point.minus(this->center)).divide(this->radius);
+}
+
+
+void Sphere::apply_transformation(Matrix transformation) {
+    this->center = this->center.apply_transformation(transformation);
 }
 
 
@@ -91,6 +99,12 @@ Vector3d Plan::get_normal_vector(Vector3d intersection_point) {
 }
 
 
+void Plan::apply_transformation(Matrix transformation) {
+    this->known_point = this->known_point.apply_transformation(transformation);
+    this->normal = this->normal.apply_transformation(transformation);
+}
+
+
 Intersection Plan::get_intersection(Ray ray) {
     Vector3d w = ray.p1.minus(this->known_point);
     Vector3d dr = ray.get_dr();
@@ -100,10 +114,21 @@ Intersection Plan::get_intersection(Ray ray) {
     return Intersection(t_int, t_int > 0);
 }
 
+
 // We can pass any value of interserction_point
 Vector3d Triangle::get_normal_vector(Vector3d intersection_point = Vector3d(0,0,0)) {
     Vector3d N = this->r1.vectorial_product(this->r2); // r1 x r2
     return N.get_vector_normalized();
+}
+
+
+void Triangle::apply_transformation(Matrix transformation) {
+    this->p1 = this->p1.apply_transformation(transformation);
+    this->p2 = this->p2.apply_transformation(transformation);
+    this->p3 = this->p3.apply_transformation(transformation);
+
+    this->r1 = p2.minus(p1);
+    this->r2 = p3.minus(p1);
 }
 
 
