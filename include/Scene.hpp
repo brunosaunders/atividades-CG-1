@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "Color.hpp"
-#include "Vector3d.hpp"
+#include "Algebra.hpp"
 #include "Lights.hpp"
 #include "Objects.hpp"
 

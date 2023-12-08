@@ -4,8 +4,7 @@
 #include <cmath>
 
 #include "Color.hpp"
-#include "Vector3d.hpp"
-#include "Ray.hpp"
+#include "Algebra.hpp"
 #include "Objects.hpp"
 #include "Camera.hpp"
 #include "Scene.hpp"
@@ -47,11 +46,11 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
     Plan *floor_plan = new Plan(Vector3d(0, sphere_radius*(-1), 0), Vector3d(0, 1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
     Plan *back_plan = new Plan(Vector3d(0, 0, -2), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
-    scene.push_object(new Sphere(Vector3d(0, 0, -1), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
+    scene.push_object(new Sphere(Vector3d(0, 0, -1.3), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
 
-    scene.push_object(new Triangle(Vector3d(-0.9, 0, -1), Vector3d(0.9, 0, -1), Vector3d(0, .9,-1)));
+    // scene.push_object(new Triangle(Vector3d(-0.9, 0, -1), Vector3d(0.9, 0, -1), Vector3d(0, .9,-1)));
 
 
     // Initialize library
