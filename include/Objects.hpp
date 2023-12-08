@@ -2,8 +2,7 @@
 #define OBJECTS_H
 
 #include "Color.hpp"
-#include "Vector3d.hpp"
-#include "Ray.hpp"
+#include "Algebra.hpp"
 #include "Lights.hpp"
 
 using namespace atividades_cg_1::algebra;

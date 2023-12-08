@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Vector3d.hpp"
+#include "Algebra.hpp"
 #include "Color.hpp"
 
 using namespace atividades_cg_1::algebra;
