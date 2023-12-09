@@ -1,6 +1,6 @@
 
 #include "Objects.hpp"
-#include "Vector3d.hpp"
+#include "Algebra.hpp"
 #include "Color.hpp"
 
 using namespace atividades_cg_1::algebra;
@@ -26,6 +26,7 @@ IntensityColor Object::get_difuse_contribution(Vector3d intersection_point, Sour
         return contribution;
     }
 
+
 IntensityColor Object::get_specular_contribution(Vector3d intersection_point, Vector3d eye_point, SourceOfLight source_of_light)
 {
     Vector3d l = this->get_light_vector(intersection_point, source_of_light);
@@ -40,16 +41,31 @@ IntensityColor Object::get_specular_contribution(Vector3d intersection_point, Ve
     return contribution;
 }
 
+
 Vector3d Object::get_light_vector(Vector3d intersection_point, SourceOfLight source)
 {
     return (source.center.minus(intersection_point)).get_vector_normalized();
 }
+
 
 // Sphere
     // n unitary vector (normal vector).
 Vector3d Sphere::get_normal_vector(Vector3d intersection_point)
 {
     return (intersection_point.minus(this->center)).divide(this->radius);
+}
+
+
+void Sphere::apply_transformation(Matrix transformation) {
+    this->center = this->center.apply_transformation(transformation);
+}
+
+
+void Sphere::apply_scale_transformation(float sx, float sy, float sz) {
+    // We need to grow sphere's radius.
+    float s = min(sx, sy);
+    s = min(s, sz);
+    this->radius *= s;
 }
 
 
@@ -91,6 +107,12 @@ Vector3d Plan::get_normal_vector(Vector3d intersection_point) {
 }
 
 
+void Plan::apply_transformation(Matrix transformation) {
+    this->known_point = this->known_point.apply_transformation(transformation);
+    this->normal = this->normal.apply_transformation(transformation);
+}
+
+
 Intersection Plan::get_intersection(Ray ray) {
     Vector3d w = ray.p1.minus(this->known_point);
     Vector3d dr = ray.get_dr();
@@ -100,30 +122,62 @@ Intersection Plan::get_intersection(Ray ray) {
     return Intersection(t_int, t_int > 0);
 }
 
+
 // We can pass any value of interserction_point
 Vector3d Triangle::get_normal_vector(Vector3d intersection_point = Vector3d(0,0,0)) {
-    Vector3d N = this->r1.vectorial_product(this->r2); // r1 x r2
+    Vector3d r1 = this->p2.minus(this->p1);
+    Vector3d r2 = this->p3.minus(this->p1);
+
+    Vector3d N = r1.vectorial_product(r2); // r1 x r2
     return N.get_vector_normalized();
+}
+
+
+void Triangle::apply_transformation(Matrix transformation) {
+ 
+    this->p1 = this->p1.apply_transformation(transformation);
+    this->p2 = this->p2.apply_transformation(transformation);
+    this->p3 = this->p3.apply_transformation(transformation);
+}
+
+
+void Triangle::apply_scale_transformation(float sx, float sy, float sz) {
+    Vector3d fixed_point = this->p1;
+    Matrix matrix_transformation = MatrixTransformations::scale(fixed_point, sx, sy, sz);
+    Triangle::apply_transformation(matrix_transformation);
+}
+
+
+void Triangle::apply_rotation_transformation(float theta, int axis) {
+    Matrix rotation_matrix = MatrixTransformations::rotation(theta, axis);
+    Triangle::apply_transformation(rotation_matrix);
 }
 
 
 Intersection Triangle::get_intersection(Ray ray) {
     Vector3d normal_vector = this->get_normal_vector();
-    float intersec_t = - ((ray.p1.minus(this->p1).scalar_product(normal_vector)) / ray.get_dr().scalar_product(normal_vector));
+    float intersec_t = - (((ray.p1.minus(this->p1)).scalar_product(normal_vector)) / ray.get_dr().scalar_product(normal_vector));
     
-    if (intersec_t == INFINITY || intersec_t == NAN)  {
-        throw std::logic_error("Intersec time is invalid (inf or nan).");
+    if (intersec_t <= 0) {
+        return Intersection(intersec_t, false);
     }
 
     Vector3d intersec_point = ray.p1.sum(ray.get_dr().multiply(intersec_t));
-    float total_area = this->p1.vectorial_product(this->p2).scalar_product(normal_vector);
+    
+    Vector3d r1 = this->p2.minus(this->p1);
+    Vector3d r2 = this->p3.minus(this->p1);
+    Vector3d v = intersec_point.minus(this->p1);
 
-    float c1 = (this->p3.minus(intersec_point).vectorial_product(this->p1.minus(intersec_point))).scalar_product(normal_vector) / total_area;
-    float c2 = (this->p1.minus(intersec_point).vectorial_product(this->p2.minus(intersec_point))).scalar_product(normal_vector) / total_area;
-    float c3 = (this->p2.minus(intersec_point).vectorial_product(this->p3.minus(intersec_point))).scalar_product(normal_vector) / total_area;
-    if (c1 < 0 || c2 < 0 || c3 < 0 ) {
-        return Intersection(intersec_t, false);
+    float total_area = r1.vectorial_product(r2).scalar_product(normal_vector);
+
+    float c1 = v.vectorial_product(r2).scalar_product(normal_vector) / total_area;
+    float c2 = r1.vectorial_product(v).scalar_product(normal_vector) / total_area;
+    float c3 = 1.0 - c1 - c2;
+    
+
+    if (c1 >= 0.0 && c2 >= 0.0 && c3 >= 0.0 && abs(c1 + c2 + c3 - 1.0) <= 1.0e-12) {
+        return Intersection(intersec_t, true);
     }
- 
-    return Intersection(intersec_t, true);
+
+    return Intersection(intersec_t, false);
 }

@@ -2,7 +2,7 @@
 #define LIGHTS_H
 
 #include "Color.hpp"
-#include "Vector3d.hpp"
+#include "Algebra.hpp"
 
 using namespace atividades_cg_1::algebra;
 using namespace atividades_cg_1::color;

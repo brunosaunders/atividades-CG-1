@@ -2,13 +2,13 @@
 #define OBJECTS_H
 
 #include "Color.hpp"
-#include "Vector3d.hpp"
-#include "Ray.hpp"
+#include "Algebra.hpp"
 #include "Lights.hpp"
 
 using namespace atividades_cg_1::algebra;
 using namespace atividades_cg_1::color;
 using namespace atividades_cg_1::lights;
+
 
 namespace atividades_cg_1::objects {
 
@@ -25,6 +25,11 @@ namespace atividades_cg_1::objects {
         IntensityColor specular_reflectivity; // K_e
         IntensityColor environment_reflectivity; // K_a
         float shininess;
+
+        virtual void apply_transformation(Matrix transformation) {};
+        virtual void apply_scale_transformation(float sx, float sy, float sz) {};
+        virtual void apply_rotation_transformation(float theta, int axis) {};
+
         virtual Intersection get_intersection(Ray ray) { return Intersection(0.0, false); }
         virtual Vector3d get_normal_vector(Vector3d intersection_point) { return Vector3d(20,20,20);};
         Vector3d get_light_vector(Vector3d intersection_point, SourceOfLight source_of_light);
@@ -48,6 +53,9 @@ namespace atividades_cg_1::objects {
         Vector3d get_normal_vector(Vector3d intersection_point) override;
 
         Intersection get_intersection(Ray ray) override;
+
+        void apply_transformation(Matrix transformation) override;
+        void apply_scale_transformation(float sx, float sy, float sz) override;
     };
 
     class Plan: public Object {
@@ -60,33 +68,32 @@ namespace atividades_cg_1::objects {
         : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), known_point(known_point), normal(normal) {}
 
         Vector3d get_normal_vector(Vector3d intersection_point) override;
+        void apply_transformation(Matrix transformation) override;
 
         Intersection get_intersection(Ray ray) override ;
     };
 
     class Triangle : public Object {
-        private:
+        protected:
             Vector3d p1;
             Vector3d p2;
             Vector3d p3;
-            Vector3d r1;
-            Vector3d r2;
 
         public:
 
             Triangle(Vector3d p1, Vector3d p2, 
             Vector3d p3, Color color=Color(255,255,255), 
             IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
-            IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10) : p1(p1), p2(p2), p3(p3), Object(color,dr, sr, er, shininess) {
-                this->r1 = p2.minus(p1);
-                this->r2 = p3.minus(p1);
-            }
+            IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10) : p1(p1), p2(p2), p3(p3), Object(color,dr, sr, er, shininess) {}
 
             Vector3d get_normal_vector(Vector3d intersection_point) override;
 
+            void apply_transformation(Matrix transformation) override;
+            void apply_scale_transformation(float sx, float sy, float sz) override;
+            void apply_rotation_transformation(float theta, int axis) override;
 
             Intersection get_intersection(Ray ray) override;
-    };
+    };  
 }
 
 #endif

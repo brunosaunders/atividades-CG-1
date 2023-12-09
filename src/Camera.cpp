@@ -1,7 +1,6 @@
 #include <vector>
 
 #include "Camera.hpp"
-#include "Vector3d.hpp"
 
 using namespace atividades_cg_1::camera;
 
