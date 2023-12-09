@@ -19,10 +19,15 @@ using namespace atividades_cg_1::scene;
 
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height)
 {
-    Vector3d eye(0, 0, 0);
-    Window *cretos_window = new Window(window_width, window_height, n_cols, n_rows, 0, 0, -30);
-    float width_ratio = sdl_width / (float)n_cols;
-    float height_ratio = sdl_height / (float)n_rows;
+    Vector3d look_at(0,0, -100);
+    Vector3d view_up(0,1000,-100);
+    Vector3d eye(50, 0, -30);
+    float focal_distance = 30.0;
+
+    Camera camera(look_at, eye, view_up, focal_distance, window_width, window_height, n_cols, n_rows);
+    // Window *cretos_window = new Window(window_width, window_height, n_cols, n_rows, 0, 0, -30);
+    float width_ratio = 1; // sdl_width / (float)n_cols;
+    float height_ratio = 1; // sdl_height / (float)n_rows;
 
     IntensityColor source_intensity = IntensityColor(.7, .7, .7);
     IntensityColor sphere_k_d = IntensityColor(.7, .2, .2);
@@ -32,7 +37,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     SourceOfLight pontual_light(source_intensity, Vector3d(0, 60, -30));
     IntensityColor environment_light_intensity = IntensityColor(0.3, 0.3, 0.3); // Come from every direction uniformly
 
-    Scene scene(Color(30, 30, 30), pontual_light, environment_light_intensity, eye);
+    Scene scene(Color(30, 30, 30), pontual_light, environment_light_intensity, camera);
 
     float sphere_radius = 20;
     IntensityColor floor_plan_k_difuse = IntensityColor(.2, .7, .2);
@@ -49,7 +54,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Plan *back_plan = new Plan(Vector3d(0, 0, -200), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
     Sphere *sphere = new Sphere(Vector3d(-19, 1, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
-    // scene.push_object(sphere);
+    scene.push_object(sphere);
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
     scene.push_object(triangle2);
@@ -105,22 +110,24 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
             if (event.type == SDL_QUIT)
             {
                 isRunning = false;
-                cretos_window->should_update = true;
+                camera.window.should_update = true;
             }
 
             if (event.type == SDL_KEYUP)
             { 
+
+                Matrix m = MatrixTransformations::arbitrary_rotation(M_PI/3, Vector3d(0,0,-100), Vector3d(0,20,-100));
+                triangle2->apply_transformation(m);
+
                 // sphere->apply_transformation(translation_matrix);
                 // triangle2->apply_scale_transformation(1.1, 1.1, 1.1);
 
                 // triangle2->apply_transformation(translation_matrix);
-                Matrix m = MatrixTransformations::arbitrary_rotation(M_PI/3, Vector3d(0,0,-100), Vector3d(0,20,-100));
-                triangle2->apply_transformation(m);
                 // triangle2->apply_rotation_transformation(M_PI/18, Y_AXIS);
 
-                // cretos_window->center.z += 0.05;
-                // cout << cretos_window->center << endl;
-                cretos_window->should_update = true;
+                // camera.window.center.z += 0.05;
+                // cout << camera.window.center << endl;
+                camera.window.should_update = true;
             }
         }
 
@@ -129,14 +136,14 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 
-        // Just draw the colors saved in cretos_window->windows_colors
-        if (!cretos_window->should_update)
+        // Just draw the colors saved in camera.window.windows_colors
+        if (!camera.window.should_update)
         {
             for (int l = 0; l < n_rows; l++)
             {
                 for (int c = 0; c < n_cols; c++)
                 {
-                    Color color = cretos_window->windows_colors[l][c];
+                    Color color = camera.window.windows_colors[l][c];
 
                     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
                     SDL_RenderDrawPointF(renderer, c * width_ratio, l * height_ratio);
@@ -150,22 +157,22 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
         // By default, we will always use Creto's system to calculate, when we need to draw just transform to SDL system
         for (int l = 0; l < n_rows; l++)
         {
-            float y = cretos_window->height / 2 - (cretos_window->dy / 2) - (cretos_window->dy * l); // Creto's system
+            float y = camera.window.height / 2 - (camera.window.dy / 2) - (camera.window.dy * l); // Creto's system
 
             for (int c = 0; c < n_cols; c++)
             {
-                float x = -cretos_window->width / 2 + (cretos_window->dx / 2) + (cretos_window->dx * c); // Creto's system
+                float x = - camera.window.width / 2 + (camera.window.dx / 2) + (camera.window.dx * c); // Creto's system
 
                 center_of_small_rectangle->x = x;
                 center_of_small_rectangle->y = y;
-                center_of_small_rectangle->z = cretos_window->center.z;
+                center_of_small_rectangle->z = camera.window.center.z;
 
-                ray->p1 = eye;
+                ray->p1 = Vector3d(0,0,0); // Eye in Camera's system
                 ray->p2 = *center_of_small_rectangle;
 
-                cretos_window->windows_colors[l][c] = scene.get_color_to_draw(*ray);
+                camera.window.windows_colors[l][c] = scene.get_color_to_draw(*ray);
 
-                Color color = cretos_window->windows_colors[l][c];
+                Color color = camera.window.windows_colors[l][c];
 
                 SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
                 SDL_RenderDrawPointF(renderer, c * width_ratio, l * height_ratio);
@@ -174,7 +181,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
         // Lastly, we update the window with the renderer we just painted
         SDL_RenderPresent(renderer);
-        cretos_window->should_update = false;
+        camera.window.should_update = false;
     }
 
     // Free the memory
@@ -185,7 +192,6 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     scene.dealloc_objects();
     delete ray;
     delete center_of_small_rectangle;
-    delete cretos_window;
     return 0;
 }
 
@@ -201,23 +207,8 @@ void test_vectorial_product() {
 }
 
 
-void test_matrix_multiply() {
-    // // float v[4][4] = {{1,0,0,2}, {0,1,0,10}, {0,0,1, 1}, {0,0,0,1}};
-    // vector<vector<float>> v = {{1,0,0,2}, {0,1,0,10}, {0,0,1, 1}, {0,0,0,1}};
-    // Matrix m = Matrix(v);
-    // m.print();
-
-    // Vector3d vector = Vector3d(0, 0, -1.3);
-    // vector.print();
-
-    // m.multiply(vector.as_matrix()).print();
-    // vector.as_matrix().print();
-    
-    // vector<vector<float>> v(vector<float>(1,2,3));
-}
 void run_tests() {
     test_vectorial_product();
-    test_matrix_multiply();
 }
 
 int main(int argc, char *argv[])
