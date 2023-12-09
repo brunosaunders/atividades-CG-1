@@ -66,10 +66,12 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Plan *back_plan = new Plan(Vector3d(0, 0, -200), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
     Sphere *sphere = new Sphere(Vector3d(-19, 1, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
+    FourPointsFace *square = new FourPointsFace(Vector3d(30, 0, -100), Vector3d(30, 20, -100), Vector3d(50, 20, -100), Vector3d(50, 0, -100));
     scene.push_object(sphere);
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
     scene.push_object(triangle2);
+    scene.push_object(square);
 
 
     // scene.push_object(new Triangle(Vector3d(-0.9, 0, -1), Vector3d(0.9, 0, -1), Vector3d(0, .9,-1)));

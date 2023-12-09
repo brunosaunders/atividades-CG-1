@@ -19,6 +19,7 @@ namespace atividades_cg_1::objects {
     public:
         virtual ~Object() {}
 
+        Object() {}
         Object(Color color, IntensityColor dr, IntensityColor sr, IntensityColor er, float shininess)
         : color(color), difuse_reflectivity(dr), specular_reflectivity(sr), environment_reflectivity(er), shininess(shininess) {}
 
@@ -86,7 +87,7 @@ namespace atividades_cg_1::objects {
             Vector3d p3;
 
         public:
-
+            Triangle(){}
             Triangle(Vector3d p1, Vector3d p2, 
             Vector3d p3, Color color=Color(255,255,255), 
             IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
@@ -100,8 +101,34 @@ namespace atividades_cg_1::objects {
 
             void apply_coordinate_change(Camera camera, int type_coord_change) override;
 
+            Vector3d get_p1();
+            Vector3d get_p2();
+            Vector3d get_p3();
+
             Intersection get_intersection(Ray ray) override;
     };  
+
+    class FourPointsFace : public Object {
+        protected:
+            Triangle t1;
+            Triangle t2;
+        
+        public:
+            FourPointsFace(Vector3d p1, Vector3d p2,
+                     Vector3d p3, Vector3d p4, Color color = Color(255, 255, 255),
+                     IntensityColor dr = IntensityColor(.7, .7, .7), IntensityColor sr = IntensityColor(.7, .7, .7),
+                     IntensityColor er = IntensityColor(.7, .7, .7), float shininess = 10);
+
+            Vector3d get_normal_vector(Vector3d intersection_point) override;
+
+            void apply_transformation(Matrix transformation) override;
+            void apply_scale_transformation(float sx, float sy, float sz) override;
+            void apply_rotation_transformation(float theta, int axis) override;
+
+            void apply_coordinate_change(Camera camera, int type_coord_change) override;
+
+            Intersection get_intersection(Ray ray) override;
+    };
 }
 
 #endif
