@@ -7,6 +7,11 @@
 using namespace std;
 
 namespace atividades_cg_1::algebra {
+    const int X_AXIS = 1;
+    const int Y_AXIS = 2;
+    const int Z_AXIS = 3;
+    const int ARBITRARY_AXIS = 4;
+    
     class Vector3d;
     class MatrixDimension {
         public:
@@ -64,7 +69,7 @@ namespace atividades_cg_1::algebra {
         int8_t is_point;
 
         Vector3d() {}
-        Vector3d(float x, float y, float z, bool is_point = 1) : x(x), y(y), z(z), is_point(is_point) {}
+        Vector3d(float x, float y, float z, int8_t is_point = 1) : x(x), y(y), z(z), is_point(is_point) {}
 
         Vector3d multiply(float value);
         Vector3d divide(float value);
@@ -107,17 +112,20 @@ namespace atividades_cg_1::algebra {
         // friend std::ostream& operator<<(std::ostream& os, const Ray& r);
     };
 
-    class MatrixTransformations {
+    // Responsible of building Transform Matrix
+    class   MatrixTransformations {
         public:
+            // Reusable matrix to all points (no point dependency).
             static Matrix translation(float tx, float ty, float tz);
+
+            // Needs the vector you want to scale, so it is not reusable, we have to build a matrix for every point.
+            static Matrix scale(Vector3d v, float sx, float sy, float sz);
+
+            static Matrix rotation(float theta, int axis);
+            static Matrix rotation(float sen_theta, float cos_theta, int axis);
+
+            static Matrix arbitrary_rotation(float theta, Vector3d p1, Vector3d p2);
     };
-
-
-    // class ApplyTransformation {
-    //     public:
-    //         static Matrix translation(Vector3d v, float tx, float ty, float tz);
-    // };
-
 }
 
 #endif

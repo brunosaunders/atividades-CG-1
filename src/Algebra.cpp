@@ -200,11 +200,102 @@ bool MatrixDimension::can_multiply(MatrixDimension other) {
 
 
 Matrix MatrixTransformations::translation(float tx, float ty, float tz) {
+    /*
+    1 0 0 tx
+    0 1 0 ty
+    0 0 1 tz
+    0 0 0 1
+    */
+
     vector<vector<float>> result{vector<float>{1,0,0,tx}, vector<float>{0,1,0,ty}, vector<float>{0,0,1,tz}, vector<float>{0,0,0,1}};
     return Matrix(result);
 }
 
 
-// Vector3d MatrixTransformations::apply(Vector3d v) {
-//     return this->matrix.multiply(v.as_matrix()).as_vector();
-// }
+Matrix MatrixTransformations::scale(Vector3d fixed_point, float sx, float sy, float sz) {
+    /*
+    Sx 0 0  (1-Sx)x
+    0 Sy 0  (1-Sy)y
+    0  0 Sz (1-Sz)z
+    0  0 0     1
+    */
+
+    vector<vector<float>> result{vector<float>{sx,0,0,(1-sx)*fixed_point.x}, vector<float>{0,sy,0,(1-sy)*fixed_point.y}, vector<float>{0,0,sz,(1-sz)*fixed_point.z}, vector<float>{0,0,0,1}};
+    return Matrix(result);
+}
+
+Matrix MatrixTransformations::rotation(float theta, int axis) {
+    vector<vector<float>> result;
+    switch (axis)
+    {
+    case X_AXIS:
+        result = {vector<float>{1,0,0,0}, vector<float>{0, cos(theta), -sin(theta), 0}, {0, sin(theta), cos(theta), 0}, {0, 0, 0, 1}};
+        break;
+    case Y_AXIS:
+        result = {vector<float>{cos(theta),0,sin(theta),0}, vector<float>{0, 1, 0, 0}, {-sin(theta), 0, cos(theta), 0}, {0, 0, 0, 1}};
+        break;
+    case Z_AXIS:
+        result = {vector<float>{cos(theta), -sin(theta), 0, 0}, vector<float>{sin(theta), cos(theta), 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
+        break;
+    default:
+        throw runtime_error("Eixo de rotação inválido.");
+        break;
+    }
+    return Matrix(result);
+}
+
+
+Matrix MatrixTransformations::rotation(float sin_theta, float cos_theta, int axis) {
+    vector<vector<float>> result;
+    switch (axis)
+    {
+    case X_AXIS:
+        result = {vector<float>{1,0,0,0}, vector<float>{0, cos_theta, -sin_theta, 0}, {0, sin_theta, cos_theta, 0}, {0, 0, 0, 1}};
+        break;
+    case Y_AXIS:
+        result = {vector<float>{cos_theta,0,sin_theta,0}, vector<float>{0, 1, 0, 0}, {-sin_theta, 0, cos_theta, 0}, {0, 0, 0, 1}};
+        break;
+    case Z_AXIS:
+        result = {vector<float>{cos_theta, -sin_theta, 0, 0}, vector<float>{sin_theta, cos_theta, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
+        break;
+    default:
+        throw runtime_error("Eixo de rotação inválido.");
+        break;
+    }
+    return Matrix(result);
+}
+
+
+Matrix MatrixTransformations::arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) {
+    Vector3d u = p2.minus(p1).get_vector_normalized();
+
+    // First step - translate p1 to origin.
+    Matrix first_matrix = MatrixTransformations::translation(-p1.x, -p1.y, -p1.z);
+
+    // Second step - rotate in x, by theta_x
+    Vector3d u1 = Vector3d(0, u.y, u.z);
+    float d = u1.size();
+    float cos_x = u1.z / d;
+    float sin_x = u1.y / d;
+
+    Matrix second_matrix = MatrixTransformations::rotation(sin_x, cos_x, X_AXIS);
+
+    // Third step - rotate in y, by theta_y
+    Vector3d u2 = Vector3d(u.x, 0, d);
+
+    float cos_y = d;
+    float sin_y = -u.x;
+
+    Matrix third_matrix = MatrixTransformations::rotation(-sin_y, cos_y, Y_AXIS);
+
+    // Fourth step - theta rotation in z
+    Matrix fourth_matrix = MatrixTransformations::rotation(theta, Z_AXIS);
+
+    // Now we reverse everything
+    Matrix fifth_matrix = MatrixTransformations::rotation(sin_y, cos_y, Y_AXIS);
+    Matrix sixth_matrix = MatrixTransformations::rotation(-sin_x, cos_x, X_AXIS);
+    Matrix seventh_matrix = MatrixTransformations::translation(p1.x, p1.y, p1.z);
+
+    Matrix result = seventh_matrix.multiply(sixth_matrix).multiply(fifth_matrix).multiply(fourth_matrix).multiply(third_matrix).multiply(second_matrix).multiply(first_matrix);
+    return result;
+}
