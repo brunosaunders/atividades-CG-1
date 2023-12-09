@@ -16,12 +16,24 @@ using namespace atividades_cg_1::objects;
 using namespace atividades_cg_1::camera;
 using namespace atividades_cg_1::scene;
 
+void run_tests();
+int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height);
+
+int main(int argc, char *argv[])
+{
+    float window_width = 60;
+    float window_height = 60;
+    // window width and height will be 1.0 meter. We will render everything in a SDL window with pixes specified.
+    run_tests();
+    return render_picture(500, 500, 500, 500, window_width, window_height);
+}
+
 
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height)
 {
     Vector3d look_at(0,0, -100);
     Vector3d view_up(0,1000,-100);
-    Vector3d eye(50, 0, -30);
+    Vector3d eye(0, 0, 0);
     float focal_distance = 30.0;
 
     Camera camera(look_at, eye, view_up, focal_distance, window_width, window_height, n_cols, n_rows);
@@ -209,11 +221,4 @@ void test_vectorial_product() {
 
 void run_tests() {
     test_vectorial_product();
-}
-
-int main(int argc, char *argv[])
-{
-    // window width and height will be 1.0 meter. We will render everything in a SDL window with pixes specified.
-    run_tests();
-    return render_picture(500, 500, 500, 500, 60, 60);
 }
