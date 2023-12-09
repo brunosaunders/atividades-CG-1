@@ -4,7 +4,9 @@
 #include "Color.hpp"
 #include "Algebra.hpp"
 #include "Lights.hpp"
+#include "Camera.hpp"
 
+using namespace atividades_cg_1::camera;
 using namespace atividades_cg_1::algebra;
 using namespace atividades_cg_1::color;
 using namespace atividades_cg_1::lights;
@@ -26,6 +28,7 @@ namespace atividades_cg_1::objects {
         IntensityColor environment_reflectivity; // K_a
         float shininess;
 
+        virtual void apply_coordinate_change(Camera camera, int type_coord_change) {};
         virtual void apply_transformation(Matrix transformation) {};
         virtual void apply_scale_transformation(float sx, float sy, float sz) {};
         virtual void apply_rotation_transformation(float theta, int axis) {};
@@ -56,6 +59,8 @@ namespace atividades_cg_1::objects {
 
         void apply_transformation(Matrix transformation) override;
         void apply_scale_transformation(float sx, float sy, float sz) override;
+
+        void apply_coordinate_change(Camera camera, int type_coord_change) override;
     };
 
     class Plan: public Object {
@@ -65,12 +70,13 @@ namespace atividades_cg_1::objects {
 
         Plan(Vector3d known_point, Vector3d normal, IntensityColor difuse_reflectivity, IntensityColor specular_reflectivity, 
         IntensityColor environment_reflectivity, float shininess, Color color)
-        : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), known_point(known_point), normal(normal) {}
+        : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), known_point(known_point), normal(normal.multiply(100000)) {}
 
-        Vector3d get_normal_vector(Vector3d intersection_point) override;
         void apply_transformation(Matrix transformation) override;
-
+        Vector3d get_normal_vector(Vector3d intersection_point) override;
         Intersection get_intersection(Ray ray) override ;
+
+        void apply_coordinate_change(Camera camera, int type_coord_change) override;
     };
 
     class Triangle : public Object {
@@ -91,6 +97,8 @@ namespace atividades_cg_1::objects {
             void apply_transformation(Matrix transformation) override;
             void apply_scale_transformation(float sx, float sy, float sz) override;
             void apply_rotation_transformation(float theta, int axis) override;
+
+            void apply_coordinate_change(Camera camera, int type_coord_change) override;
 
             Intersection get_intersection(Ray ray) override;
     };  

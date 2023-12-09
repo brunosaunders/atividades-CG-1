@@ -2,11 +2,12 @@
 #include "Objects.hpp"
 #include "Algebra.hpp"
 #include "Color.hpp"
+#include "Camera.hpp"
 
 using namespace atividades_cg_1::algebra;
 using namespace atividades_cg_1::color;
 using namespace atividades_cg_1::objects;
-
+using namespace atividades_cg_1::camera;
 
 IntensityColor Object::get_difuse_contribution(Vector3d intersection_point, SourceOfLight source_of_light)
     {
@@ -101,6 +102,22 @@ Intersection Sphere::get_intersection(Ray ray)
     return Intersection(t2, true);
 }
 
+void Sphere::apply_coordinate_change(Camera camera, int type_coord_change) {
+    switch (type_coord_change)
+    {
+    case CHANGE_FROM_WORLD_TO_CAMERA:
+        this->center = camera.transform_vector_from_world_to_camera(this->center);
+        break;
+
+    case CHANGE_FROM_CAMERA_TO_WORLD:
+        this->center = camera.transform_vector_from_camera_to_world(this->center);
+        break;
+    default:
+        throw runtime_error("Tipo de mudança de coordenada inválida");
+        break;
+    }
+}
+
 
 Vector3d Plan::get_normal_vector(Vector3d intersection_point) {
     return this->normal.get_vector_normalized();
@@ -120,6 +137,25 @@ Intersection Plan::get_intersection(Ray ray) {
     float t_int = -(this->normal.scalar_product(w))/(this->normal.scalar_product(dr));
 
     return Intersection(t_int, t_int > 0);
+}
+
+
+void Plan::apply_coordinate_change(Camera camera, int type_coord_change) {
+    switch (type_coord_change)
+    {
+    case CHANGE_FROM_WORLD_TO_CAMERA:
+        this->known_point = camera.transform_vector_from_world_to_camera(this->known_point);
+        this->normal = camera.transform_vector_from_world_to_camera(this->normal);
+        break;
+        
+    case CHANGE_FROM_CAMERA_TO_WORLD:
+        this->known_point = camera.transform_vector_from_camera_to_world(this->known_point);
+        this->normal = camera.transform_vector_from_camera_to_world(this->normal);
+        break;
+    default:
+        throw runtime_error("Tipo de mudança de coordenada inválida");
+        break;
+    }
 }
 
 
@@ -180,4 +216,25 @@ Intersection Triangle::get_intersection(Ray ray) {
     }
 
     return Intersection(intersec_t, false);
+}
+
+
+void Triangle::apply_coordinate_change(Camera camera, int type_coord_change) {
+    switch (type_coord_change)
+    {
+    case CHANGE_FROM_WORLD_TO_CAMERA:
+        this->p1 = camera.transform_vector_from_world_to_camera(this->p1);
+        this->p2 = camera.transform_vector_from_world_to_camera(this->p2);
+        this->p3 = camera.transform_vector_from_world_to_camera(this->p3);
+        break;
+        
+    case CHANGE_FROM_CAMERA_TO_WORLD:
+        this->p1 = camera.transform_vector_from_camera_to_world(this->p1);
+        this->p2 = camera.transform_vector_from_camera_to_world(this->p2);
+        this->p3 = camera.transform_vector_from_camera_to_world(this->p3);
+        break;
+    default:
+        throw runtime_error("Tipo de mudança de coordenada inválida");
+        break;
+    }
 }
