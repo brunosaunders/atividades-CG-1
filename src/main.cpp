@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     float window_height = 60;
     // window width and height will be 1.0 meter. We will render everything in a SDL window with pixes specified.
     run_tests();
+    // return 0;
     return render_picture(500, 500, 500, 500, window_width, window_height);
 }
 
@@ -64,18 +65,19 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     
     Matrix translation_matrix = MatrixTransformations::translation(10, 10, 0);
     
-    Plan *floor_plan = new Plan(Vector3d(0, sphere_radius*(-1), 0), Vector3d(0, 1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
-    Plan *back_plan = new Plan(Vector3d(0, 0, -200), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
+    Plan *floor_plan = new Plan(Vector3d(0, sphere_radius*(-1), 0), Vector3d(0, 1, 0), Color(50,25,199));
+    Plan *back_plan = new Plan(Vector3d(0, 0, -200), Vector3d(0,0,1), Color(255,255,255));
     Sphere *sphere = new Sphere(Vector3d(-19, 1, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
+    Cylinder *cylinder = new Cylinder(Vector3d(20,0, -100), Vector3d(20, 50, -100), 15);
     
-    
-    scene.push_object(sphere);
+    // scene.push_object(sphere);
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
-    scene.push_object(triangle2);
+    // scene.push_object(triangle2);
+    scene.push_object(cylinder);
 
-    Mesh* cube = ObjFactory::create_cube();
+    // Mesh* cube = ObjFactory::create_cube();
     // scene.push_object(cube);
 
     // Initialize library
@@ -183,8 +185,10 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
                 ray->p1 = Vector3d(0,0,0); // Eye in Camera's system
                 ray->p2 = *center_of_small_rectangle;
-
+               
                 camera.window.windows_colors[l][c] = scene.get_color_to_draw(*ray);
+
+             
 
                 Color color = camera.window.windows_colors[l][c];
 
@@ -220,6 +224,29 @@ void test_vectorial_product() {
     }
 }
 
+void test_matrix_transpose() {
+    Matrix m1(vector<vector<float>>{
+        vector<float>{1, 2, 3},
+        vector<float>{4, 5, 6},
+        vector<float>{7,8,9}
+    });
+
+    m1.print();
+    cout << endl;
+    m1.transposed().print();
+    cout << endl;
+
+    Matrix m2(vector<vector<float>>{
+        vector<float>{1, 2, 3},
+    });
+
+    m2.print();
+    cout << endl;
+    m2.transposed().print();
+    cout << endl;
+}
+
 void run_tests() {
     test_vectorial_product();
+    // test_matrix_transpose();
 }

@@ -56,7 +56,7 @@ namespace atividades_cg_1::objects {
         IntensityColor get_specular_contribution(Vector3d intersec_point, Intersection intersection, Vector3d eye_point, SourceOfLight source_of_light);
     };
 
-
+  
     class Sphere : public Object
     {
     public:
@@ -82,9 +82,10 @@ namespace atividades_cg_1::objects {
         Vector3d known_point;
         Vector3d normal;
 
-        Plan(Vector3d known_point, Vector3d normal, IntensityColor difuse_reflectivity, IntensityColor specular_reflectivity, 
-        IntensityColor environment_reflectivity, float shininess, Color color)
-        : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), known_point(known_point), normal(normal.multiply(100000)) {}
+        Plan(Vector3d known_point, Vector3d normal, Color color=Color(255,255,255), 
+            IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
+            IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10)
+        : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), known_point(known_point), normal(normal) {}
 
         void apply_transformation(Matrix transformation) override;
         Vector3d get_normal_vector(Vector3d intersec_point, Intersection intersection) override;
@@ -129,22 +130,25 @@ namespace atividades_cg_1::objects {
             Intersection get_intersection(Ray ray) override;
     };
 
-    class Cylinder: public Object {
+    class Cylinder: public Object, public Composite {
     public:
         Vector3d base_center;
         Vector3d top_center;
-        Vector3d cyl_direction;
         float radius;
-        float height;
 
-        Cylinder(Vector3d base_center, Vector3d top_center, Vector3d cyl_direction, float radius, float height,IntensityColor difuse_reflectivity, IntensityColor specular_reflectivity,
-                 IntensityColor environment_reflectivity, float shininess, Color color)
-                : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), base_center(base_center), top_center(top_center), cyl_direction(cyl_direction),  radius(radius), height(height) {}
+        Cylinder(Vector3d base_center, Vector3d top_center, float radius, Color color=Color(255,255,255), 
+            IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
+            IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10)
+                : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), base_center(base_center), 
+                top_center(top_center), radius(radius) {}
 
         Vector3d get_normal_vector(Vector3d intersection_point, Intersection Intersection) override;
 
         Intersection get_intersection(Ray ray) override;
-        // Vector3d get_center() override;
+
+        Vector3d get_cylinder_dr();
+        float get_height(); 
+        Vector3d get_center() override;
     };
 
     class FourPointsFace : public Object, public Composite {

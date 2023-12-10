@@ -78,6 +78,31 @@ Matrix Vector3d::as_matrix() {
     return Matrix(result);
 }
 
+Matrix Matrix::transposed() {
+    vector<vector<float>> matrix_transposed;
+    if (this->dimension.n == this->dimension.m) {
+        matrix_transposed = vector<vector<float>>(this->dimension.n, vector<float>(this->dimension.n, 0)); // initialize matrix.
+        
+    } else {
+        matrix_transposed = vector<vector<float>>(this->dimension.m, vector<float>(this->dimension.n, 0)); // initialize matrix.
+    }
+
+    for (int i=0; i < this->dimension.m; i++) {
+        for (int j=0; j < this->dimension.n; j++) {
+            matrix_transposed[i][j] = this->matrix[j][i];
+        }
+    }
+    return matrix_transposed;
+}
+
+Matrix Matrix::identity() {
+    return Matrix(vector<vector<float>>{
+        vector<float>{1,0,0,0},
+        vector<float>{0,1,0,0},
+        vector<float>{0,0,1,0},
+        vector<float>{0,0,0,1}
+    });
+}
 
 float Ray::size()
 {
@@ -141,6 +166,11 @@ Matrix Matrix::divide_scalar(float v) {
 
 Matrix Matrix::multiply(Matrix other) {
     if (!this->dimension.can_multiply(other.dimension)) {
+        cout << "(" << this->dimension.n << "," << this->dimension.m << ") - ";
+        cout << "(" << other.dimension.n << "," << other.dimension.m << ")\n";
+        this->print();
+        cout << endl;
+        other.print();
         throw runtime_error("Matrizes incompatíveis para a multiplicação.");
     }
     

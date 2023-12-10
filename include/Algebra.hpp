@@ -48,7 +48,11 @@ namespace atividades_cg_1::algebra
         Matrix divide_scalar(float v);
 
         Vector3d as_vector();
+
+        Matrix transposed();
         void print();
+
+        static Matrix identity();
     };
 
     
