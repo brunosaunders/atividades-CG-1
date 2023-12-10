@@ -8,9 +8,11 @@
 #include "Objects.hpp"
 #include "Camera.hpp"
 #include "Scene.hpp"
+#include "Reader.hpp"
 
 using namespace std;
 
+using namespace atividades_cg_1::reader;
 using namespace atividades_cg_1::algebra;
 using namespace atividades_cg_1::objects;
 using namespace atividades_cg_1::camera;
@@ -34,7 +36,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Vector3d look_at(0,0, -100);
     Vector3d view_up(0,1000,-100);
     Vector3d eye(0, 0, 0);
-    float focal_distance = 30.0;
+    float focal_distance = 30;
 
     Camera camera(look_at, eye, view_up, focal_distance, window_width, window_height, n_cols, n_rows);
     // Window *cretos_window = new Window(window_width, window_height, n_cols, n_rows, 0, 0, -30);
@@ -66,17 +68,15 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Plan *back_plan = new Plan(Vector3d(0, 0, -200), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
     Sphere *sphere = new Sphere(Vector3d(-19, 1, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
-    FourPointsFace *square = new FourPointsFace(Vector3d(30, 0, -100), Vector3d(30, 20, -100), Vector3d(50, 20, -100), Vector3d(50, 0, -100));
+    
+    
     scene.push_object(sphere);
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
     scene.push_object(triangle2);
-    scene.push_object(square);
 
-
-    // scene.push_object(new Triangle(Vector3d(-0.9, 0, -1), Vector3d(0.9, 0, -1), Vector3d(0, .9,-1)));
-    // sphere->apply_scale_transformation(2,2,2);
-
+    Mesh* cube = ObjFactory::create_cube();
+    // scene.push_object(cube);
 
     // Initialize library
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -219,7 +219,6 @@ void test_vectorial_product() {
         throw logic_error("vectorial_product failed");
     }
 }
-
 
 void run_tests() {
     test_vectorial_product();

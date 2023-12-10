@@ -4,4 +4,5 @@ target_sources(${PROJECT_NAME} PRIVATE
     Lights.hpp
     Objects.hpp
     Scene.hpp
+    Reader.hpp
 )

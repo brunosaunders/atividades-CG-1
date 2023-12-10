@@ -9,11 +9,10 @@ using namespace atividades_cg_1::color;
 using namespace atividades_cg_1::objects;
 using namespace atividades_cg_1::camera;
 
-IntensityColor Object::get_difuse_contribution(Vector3d intersection_point, SourceOfLight source_of_light)
+IntensityColor Object::get_difuse_contribution(Vector3d intersec_point, Intersection intersection, SourceOfLight source_of_light)
 {
-
-    Vector3d l = this->get_light_vector(intersection_point, source_of_light);
-    Vector3d n = this->get_normal_vector(intersection_point);
+    Vector3d l = this->get_light_vector(intersec_point, intersection, source_of_light);
+    Vector3d n = this->get_normal_vector(intersec_point, intersection);
     float scalar_product_l_n = l.scalar_product(n);
 
     // if scalar_product is negative, the angle is greater than 180 degrees and we can't see the object. The color in result will be black.
@@ -27,13 +26,13 @@ IntensityColor Object::get_difuse_contribution(Vector3d intersection_point, Sour
     return contribution;
 }
 
-IntensityColor Object::get_specular_contribution(Vector3d intersection_point, Vector3d eye_point, SourceOfLight source_of_light)
+IntensityColor Object::get_specular_contribution(Vector3d intersec_point, Intersection intersection, Vector3d eye_point, SourceOfLight source_of_light)
 {
-    Vector3d l = this->get_light_vector(intersection_point, source_of_light);
-    Vector3d n = this->get_normal_vector(intersection_point);
+    Vector3d l = this->get_light_vector(intersec_point, intersection, source_of_light);
+    Vector3d n = this->get_normal_vector(intersec_point, intersection);
 
     Vector3d r = n.multiply(2).minus(l).get_vector_normalized();
-    Vector3d v = eye_point.minus(intersection_point).get_vector_normalized();
+    Vector3d v = eye_point.minus(intersec_point).get_vector_normalized();
 
     float f_specular = std::pow(r.scalar_product(v), this->shininess);
 
@@ -41,16 +40,16 @@ IntensityColor Object::get_specular_contribution(Vector3d intersection_point, Ve
     return contribution;
 }
 
-Vector3d Object::get_light_vector(Vector3d intersection_point, SourceOfLight source)
+Vector3d Object::get_light_vector(Vector3d intersec_point, Intersection intersection, SourceOfLight source)
 {
-    return (source.center.minus(intersection_point)).get_vector_normalized();
+    return (source.center.minus(intersec_point)).get_vector_normalized();
 }
 
 // Sphere
 // n unitary vector (normal vector).
-Vector3d Sphere::get_normal_vector(Vector3d intersection_point)
+Vector3d Sphere::get_normal_vector(Vector3d intersec_point, Intersection intersection)
 {
-    return (intersection_point.minus(this->center)).divide(this->radius);
+    return (intersec_point.minus(this->center)).divide(this->radius);
 }
 
 void Sphere::apply_transformation(Matrix transformation)
@@ -94,8 +93,8 @@ Intersection Sphere::get_intersection(Ray ray)
 
     Vector3d intersection_point;
     if (t1 < t2)
-        return Intersection(t1, true);
-    return Intersection(t2, true);
+        return Intersection(t1, true, this);
+    return Intersection(t2, true, this);
 }
 
 void Sphere::apply_coordinate_change(Camera camera, int type_coord_change)
@@ -115,7 +114,7 @@ void Sphere::apply_coordinate_change(Camera camera, int type_coord_change)
     }
 }
 
-Vector3d Plan::get_normal_vector(Vector3d intersection_point)
+Vector3d Plan::get_normal_vector(Vector3d intersec_point, Intersection intersection)
 {
     return this->normal.get_vector_normalized();
 }
@@ -132,8 +131,10 @@ Intersection Plan::get_intersection(Ray ray)
     Vector3d dr = ray.get_dr();
 
     float t_int = -(this->normal.scalar_product(w)) / (this->normal.scalar_product(dr));
-
-    return Intersection(t_int, t_int > 0);
+    if (t_int > 0) {
+        return Intersection(t_int, true, this);
+    }
+    return Intersection(t_int, false);
 }
 
 void Plan::apply_coordinate_change(Camera camera, int type_coord_change)
@@ -156,21 +157,22 @@ void Plan::apply_coordinate_change(Camera camera, int type_coord_change)
 }
 
 Triangle::Triangle(Vector3d p1, Vector3d p2,
-                   Vector3d p3, Color color = Color(255, 255, 255),
+                   Vector3d p3, Color color,
                    IntensityColor dr, IntensityColor sr,
-                   IntensityColor er, float shininess) : p1(p1), p2(p2), p3(p3), Object(color, dr, sr, er, shininess)
-{
-    this->center = p1.sum(p2).sum(p3).divide(3);
-}
+                   IntensityColor er, float shininess) : p1(p1), p2(p2), p3(p3), Object(color, dr, sr, er, shininess) {}
 
 // We can pass any value of interserction_point
-Vector3d Triangle::get_normal_vector(Vector3d intersection_point = Vector3d(0, 0, 0))
+Vector3d Triangle::get_normal_vector(Vector3d intersec_point = Vector3d(), Intersection intersection = Intersection())
 {
     Vector3d r1 = this->p2.minus(this->p1);
     Vector3d r2 = this->p3.minus(this->p1);
 
     Vector3d N = r1.vectorial_product(r2); // r1 x r2
     return N.get_vector_normalized();
+}
+
+Vector3d Triangle::get_center() {
+    return this->p1.sum(this->p2).sum(this->p3).divide(3);
 }
 
 void Triangle::apply_transformation(Matrix transformation)
@@ -183,7 +185,7 @@ void Triangle::apply_transformation(Matrix transformation)
 
 void Triangle::apply_scale_transformation(float sx, float sy, float sz)
 {
-    Vector3d fixed_point = this->center;
+    Vector3d fixed_point = this->get_center();
     Matrix matrix_transformation = MatrixTransformations::scale(fixed_point, sx, sy, sz);
     Triangle::apply_transformation(matrix_transformation);
 }
@@ -218,7 +220,7 @@ Intersection Triangle::get_intersection(Ray ray)
 
     if (c1 >= 0.0 && c2 >= 0.0 && c3 >= 0.0 && abs(c1 + c2 + c3 - 1.0) <= 1.0e-12)
     {
-        return Intersection(intersec_t, true);
+        return Intersection(intersec_t, true, this);
     }
 
     return Intersection(intersec_t, false);
@@ -245,6 +247,7 @@ void Triangle::apply_coordinate_change(Camera camera, int type_coord_change)
     }
 }
 
+
 Triangle FourPointsFace::get_t1()
 {
     return this->t1;
@@ -270,10 +273,6 @@ Vector3d Triangle::get_p3()
     return this->p3;
 }
 
-Vector3d Composite::get_center()
-{
-    return this->center;
-}
 
 FourPointsFace::FourPointsFace(Vector3d p1, Vector3d p2,
                                Vector3d p3, Vector3d p4, Color color,
@@ -282,10 +281,13 @@ FourPointsFace::FourPointsFace(Vector3d p1, Vector3d p2,
 {
     this->t1 = Triangle(p1, p2, p3);
     this->t2 = Triangle(p3, p4, p1);
-    this->center = this->t1.get_center().sum(this->t2.get_center()).divide(2);
 }
 
-Vector3d FourPointsFace::get_normal_vector(Vector3d intersection_point = Vector3d(0, 0, 0))
+Vector3d FourPointsFace::get_center() {
+    return this->t1.get_center().sum(this->t2.get_center()).divide(2);
+}
+
+Vector3d FourPointsFace::get_normal_vector(Vector3d intersec_point, Intersection intersection)
 {
     return this->t1.get_normal_vector();
 }
@@ -298,7 +300,7 @@ void FourPointsFace::apply_transformation(Matrix transformation)
 
 void FourPointsFace::apply_scale_transformation(float sx, float sy, float sz)
 {
-    Vector3d fixed_point = this->center;
+    Vector3d fixed_point = this->get_center();
     Matrix matrix_transformation = MatrixTransformations::scale(fixed_point, sx, sy, sz);
     this->t1.apply_transformation(matrix_transformation);
     this->t2.apply_transformation(matrix_transformation);
@@ -324,7 +326,7 @@ Intersection FourPointsFace::get_intersection(Ray ray)
         return intersec1;
         
     } 
-    
+
     Intersection intersec2 = this->t2.get_intersection(ray);
     if (intersec2.is_valid)
     {
@@ -344,13 +346,20 @@ void FourPointsFace::apply_coordinate_change(Camera camera, int type_coord_chang
     this->t2.apply_coordinate_change(camera, type_coord_change);
 }
 
+void FourPointsFace::print() {
+    this->get_center().print();
+}
+
 Mesh::Mesh(vector<FourPointsFace> faces, Color color,
            IntensityColor dr, IntensityColor sr,
            IntensityColor er, float shininess) : faces(faces), Object(color, dr, sr, er, shininess)
-{
+{}
+
+Vector3d Mesh::get_center() {
     int count = 0;
     Vector3d v(0, 0, 0);
-    for (auto &face : faces)
+
+    for (auto &face : this->faces)
     {
         v = v.sum(face.get_center());
         count++;
@@ -361,7 +370,7 @@ Mesh::Mesh(vector<FourPointsFace> faces, Color color,
         throw runtime_error("Malha inválida (não possui faces).");
     }
 
-    this->center = v.divide(count);
+    return v.divide(count);
 }
 
 void Mesh::apply_transformation(Matrix transformation)
@@ -382,7 +391,7 @@ void Mesh::apply_coordinate_change(Camera camera, int type_coord_change)
 
 void Mesh::apply_scale_transformation(float sx, float sy, float sz)
 {
-    Vector3d fixed_point = this->center;
+    Vector3d fixed_point = this->get_center();
     Matrix matrix_transformation = MatrixTransformations::scale(fixed_point, sx, sy, sz);
 
     for (auto& face : this->faces) {
@@ -399,26 +408,36 @@ void Mesh::apply_rotation_transformation(float theta, int axis)
     }
 }
 
+void Mesh::print() {
+    cout << "Face centers\n";
+    for (auto& item : this->faces) {
+        item.get_center().print();
+    }
+    cout << endl;
+}
+
+Vector3d Mesh::get_normal_vector(Vector3d intersec_point, Intersection intersection) {
+    return intersection.intersepted_object->get_normal_vector(intersec_point, intersection);
+}
+
 Intersection Mesh::get_intersection(Ray ray) {
-    float t_min = INFINITY;
-    FourPointsFace face_min;
+
+    Intersection intersection_min(INFINITY, false);
 
     for (auto& face : this->faces) {
         Intersection intersection = face.get_intersection(ray);
-        if (intersection.is_valid && intersection.time < t_min) {
-            t_min = intersection.time;
-            face_min = face;
+        if (intersection.is_valid && intersection.time < intersection_min.time) {
+            intersection_min = intersection;
         }
     }
 
-    if (t_min != INFINITY) {
-        this->color = face_min.color;
-        this->shininess = face_min.shininess;
-        this->difuse_reflectivity = face_min.difuse_reflectivity;
-        this->environment_reflectivity = face_min.environment_reflectivity;
-        this->specular_reflectivity = face_min.specular_reflectivity;
-        return Intersection(t_min, true);
+    if (intersection_min.time != INFINITY) {
+        this->color = intersection_min.intersepted_object->color;
+        this->shininess = intersection_min.intersepted_object->shininess;
+        this->difuse_reflectivity = intersection_min.intersepted_object->difuse_reflectivity;
+        this->environment_reflectivity = intersection_min.intersepted_object->environment_reflectivity;
+        this->specular_reflectivity = intersection_min.intersepted_object->specular_reflectivity;
     }
-
-    return Intersection(t_min, false);
+    
+    return intersection_min;
 }
