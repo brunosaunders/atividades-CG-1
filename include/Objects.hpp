@@ -64,7 +64,9 @@ namespace atividades_cg_1::objects {
         float radius;
 
         Sphere(Vector3d center, float radius, Color color, IntensityColor difuse_reflectivity, IntensityColor specular_reflectivity, IntensityColor environment_reflectivity, float shininess)
-        : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), center(center), radius(radius) {}
+        : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), center(center), radius(radius) {
+            // this->color.print();
+        }
 
         // n unitary vector (normal vector).
         Vector3d get_normal_vector(Vector3d intersec_point, Intersection intersection) override;
@@ -84,7 +86,7 @@ namespace atividades_cg_1::objects {
 
         Plan(Vector3d known_point, Vector3d normal, IntensityColor difuse_reflectivity, IntensityColor specular_reflectivity, 
         IntensityColor environment_reflectivity, float shininess, Color color)
-        : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), known_point(known_point), normal(normal.multiply(100000)) {}
+        : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), known_point(known_point), normal(normal) {}
 
         void apply_transformation(Matrix transformation) override;
         Vector3d get_normal_vector(Vector3d intersec_point, Intersection intersection) override;
@@ -156,6 +158,27 @@ namespace atividades_cg_1::objects {
             Vector3d get_center() override;
 
     };
+
+    class Cylinder: public Object {
+    public:
+        Vector3d base_center;
+        Vector3d top_center;
+        float radius;
+
+        Cylinder() {}
+        Cylinder(Vector3d base_center, Vector3d top_center, float radius, Color color, 
+            IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
+            IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10);
+
+        Vector3d get_normal_vector(Vector3d intersection_point, Intersection Intersection) override;
+
+        Intersection get_intersection(Ray ray) override;
+
+        Vector3d get_cylinder_dr();
+        float get_height(); 
+        // Vector3d get_center() override;
+    };
+
 
     class Mesh : public Object, public Composite {
         // protected:

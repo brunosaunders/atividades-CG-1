@@ -102,7 +102,11 @@ void Sphere::apply_coordinate_change(Camera camera, int type_coord_change)
     switch (type_coord_change)
     {
     case CHANGE_FROM_WORLD_TO_CAMERA:
+        cout << "Esfera: ";
+        this->center.print();
         this->center = camera.transform_vector_from_world_to_camera(this->center);
+        cout << "Esfera depois: ";
+        this->center.print();
         break;
 
     case CHANGE_FROM_CAMERA_TO_WORLD:
@@ -130,7 +134,8 @@ Intersection Plan::get_intersection(Ray ray)
     Vector3d w = ray.p1.minus(this->known_point);
     Vector3d dr = ray.get_dr();
 
-    float t_int = -(this->normal.scalar_product(w)) / (this->normal.scalar_product(dr));
+    // float t_int = -(this->get_normal_vector(Vector3d(), Intersection()).scalar_product(w)) / (this->get_normal_vector(Vector3d(), Intersection()).scalar_product(dr));
+    float t_int = -(this->normal).scalar_product(w) / (this->normal).scalar_product(dr);
     if (t_int > 0) {
         return Intersection(t_int, true, this);
     }
@@ -440,4 +445,117 @@ Intersection Mesh::get_intersection(Ray ray) {
     }
     
     return intersection_min;
+}
+
+Cylinder::Cylinder(Vector3d base_center, Vector3d top_center, float radius, Color color, 
+            IntensityColor dr, IntensityColor sr,
+            IntensityColor er, float shininess)
+                : top_center(top_center), radius(radius), Object(color, difuse_reflectivity, specular_reflectivity,
+                environment_reflectivity, shininess), base_center(base_center){
+                    this->color = Color(255,255,255);
+                    this->color.print();
+                }
+
+Vector3d Cylinder::get_cylinder_dr() {
+    return this->top_center.minus(this->base_center).get_vector_normalized();
+}
+
+float Cylinder::get_height() {
+    return this->top_center.minus(this->base_center).size();
+}
+
+// Vector3d Cylinder::get_center() {
+//     return this->top_center.sum(this->base_center).divide(2);
+// }
+
+
+Vector3d Cylinder::get_normal_vector(Vector3d intersection_point, Intersection intersection) {
+    // return Vector3d(0, 15, -85);
+    // Vector3d v, p_v, h;
+    float v_escalar_dc, erro = 1e-12;
+
+    Vector3d v = intersection_point.minus(this->base_center);
+    v_escalar_dc = v.scalar_product(this->get_cylinder_dr());
+    Vector3d p_v = this->get_cylinder_dr().multiply(v_escalar_dc);
+    Vector3d h = v.minus(p_v);
+
+    if (0.0 < v_escalar_dc && v_escalar_dc < this->get_height()) {
+        return h.get_vector_normalized();
+
+    } else if (v_escalar_dc <= 0.0) {
+
+        return this->get_cylinder_dr().multiply(-1.0);
+
+    } else {
+        return this->get_cylinder_dr();
+    }
+}
+
+Intersection Cylinder::get_intersection(Ray ray) {
+
+    // w = P0 - centro_base
+    Vector3d dr = ray.get_dr();
+    // Vector3d d = ray.get_dr();
+
+    Vector3d u = this->get_cylinder_dr();
+    Vector3d s = ray.p1.minus(this->base_center);
+    // Vector3d v = (ray.p1.minus(this->base_center)).minus(u.multiply((ray.p1.minus(this->base_center)).scalar_product(u)));
+    Vector3d v = s.minus(u.multiply(s.scalar_product(u)));
+    Vector3d w = dr.minus(u.multiply(dr.scalar_product(u)));
+    // Vector3d w = ray.p1.minus(this->base_center);
+
+    float cylinder_height = this->get_height();
+
+
+    float a = w.scalar_product(w);
+    float b = (v.scalar_product(w)) * 2;
+    float c = v.scalar_product(v) - pow(this->radius, 2);
+    
+    float delta = pow(b, 2) - 4*a*c;
+
+    if (delta < 0) {
+        return Intersection(-1, false, this);
+        // caso em que o raio pode passar pela base.
+    } else if (delta == 0) {
+        if (a == 0) {
+            return Intersection(-1, false, this); // é pra ser true
+        }
+
+        float t_int = -b / (2*a);
+        return Intersection(t_int, true, this);
+    } else {
+        float t1 = (-b + sqrt(delta)) / (2*a);
+        float t2 = (-b - sqrt(delta)) / (2*a);
+
+        Vector3d P1 = ray.p1.sum(dr.multiply(t1));
+        Vector3d P2 = ray.p1.sum(dr.multiply(t2));
+
+        Vector3d W1 = P1.minus(this->base_center);
+        Vector3d W2 = P2.minus(this->base_center);
+
+        // Check if it is valid
+        Vector3d dc = this->get_cylinder_dr();
+        
+        float t1_scalar_product_check = W1.scalar_product(dc);
+        float t2_scalar_product_check = W2.scalar_product(dc);
+
+        float height = this->get_height();
+
+        bool t1_valid = t1_scalar_product_check >= 0 && t1_scalar_product_check <= height;
+        bool t2_valid = t2_scalar_product_check >= 0 && t2_scalar_product_check <= height;
+        Intersection intersection_min(INFINITY, false);
+
+        if (t1_valid) {
+            intersection_min = Intersection(t1, true, this);
+            // cout << "t1 ";
+        }
+
+        if (t2_valid && t2 < intersection_min.time) {
+            intersection_min = Intersection(t2, true, this);
+            // cout << "t2 ";
+        }
+        return intersection_min;
+    }
+
+    // return Intersection(t_int, std::abs(t_int + 1.0) > 1.0e-12, this);
 }

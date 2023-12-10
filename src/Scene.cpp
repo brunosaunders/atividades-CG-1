@@ -30,6 +30,7 @@ Color Scene::get_color_to_draw(Ray ray)
 
     Object *obj = intersection_min.intersepted_object;
     Color color = obj->color;
+    // cout << color.r << " " << color.g << " " << color.b << endl;
 
     // Pin + t*dr
     Vector3d intersection_point = ray.p1.sum(ray.get_dr().multiply(intersection_min.time));
@@ -38,8 +39,6 @@ Color Scene::get_color_to_draw(Ray ray)
     Ray ray_light(this->source_of_light.center, intersection_point);
 
     Intersection intersection_min2(INFINITY, false);
-    // float min_t2 = INFINITY;
-    // Object *min_obj = objects[0];
 
     for (auto & object : objects)
     {
@@ -98,23 +97,28 @@ Camera Scene::get_camera() {
 void Scene::push_object(Object *obj)
 {
     obj->apply_coordinate_change(this->camera, CHANGE_FROM_WORLD_TO_CAMERA);
+    obj->print();
+
     objects.push_back(obj);
 }
 
 
 void Scene::set_camera(Camera camera) {
     camera.window.should_update = true; // Please check if we have to pass camera as reference.
-
+    cout << "oi ";
     // Apply Camera matrix(W->C) to each object
     if (this->coordinates_type == WORLD_COORDINATES) {
+        cout << "sim ";
         for (auto& obj : this->objects) {
+            cout << ":D ";
             obj->apply_coordinate_change(camera, CHANGE_FROM_WORLD_TO_CAMERA);
+            obj->print();
         }
         this->camera = camera;
         this->coordinates_type = CAMERA_COORDINATES;
         return;
     }
-
+    cout << "não ";
     // Apply Old Camera matrix(C->W) to each object
     // Apply New Camera matrix(W->C) to each object
     for (auto& obj : this->objects) {

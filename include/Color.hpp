@@ -26,15 +26,19 @@ namespace atividades_cg_1::color {
     class Color
     {
     public:
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
+        int r;
+        int g;
+        int b;
 
         Color() {}
-        Color(uint8_t red, uint8_t green, uint8_t blue): r(red), g(green), b(blue) {}
+        Color(int red, int green, int blue): r(red), g(green), b(blue) {}
 
         IntensityColor to_color_normalized() const;
         Color multiply(IntensityColor intensity) const;
+
+        void print() {
+            std::cout << r << " " << g << " " << b << "\n";
+        }
     };
 
 }

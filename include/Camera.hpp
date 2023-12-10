@@ -57,7 +57,6 @@ namespace atividades_cg_1::camera {
             Vector3d transform_vector_from_world_to_camera(Vector3d v);
             Vector3d transform_vector_from_camera_to_world(Vector3d v);
             void destroy();
-
     };
 }
 
