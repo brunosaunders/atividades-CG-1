@@ -155,6 +155,14 @@ void Plan::apply_coordinate_change(Camera camera, int type_coord_change)
     }
 }
 
+Triangle::Triangle(Vector3d p1, Vector3d p2,
+                   Vector3d p3, Color color = Color(255, 255, 255),
+                   IntensityColor dr, IntensityColor sr,
+                   IntensityColor er, float shininess) : p1(p1), p2(p2), p3(p3), Object(color, dr, sr, er, shininess)
+{
+    this->center = p1.sum(p2).sum(p3).divide(3);
+}
+
 // We can pass any value of interserction_point
 Vector3d Triangle::get_normal_vector(Vector3d intersection_point = Vector3d(0, 0, 0))
 {
@@ -175,7 +183,7 @@ void Triangle::apply_transformation(Matrix transformation)
 
 void Triangle::apply_scale_transformation(float sx, float sy, float sz)
 {
-    Vector3d fixed_point = this->p1;
+    Vector3d fixed_point = this->center;
     Matrix matrix_transformation = MatrixTransformations::scale(fixed_point, sx, sy, sz);
     Triangle::apply_transformation(matrix_transformation);
 }
@@ -237,6 +245,16 @@ void Triangle::apply_coordinate_change(Camera camera, int type_coord_change)
     }
 }
 
+Triangle FourPointsFace::get_t1()
+{
+    return this->t1;
+}
+
+Triangle FourPointsFace::get_t2()
+{
+    return this->t2;
+}
+
 Vector3d Triangle::get_p1()
 {
     return this->p1;
@@ -252,13 +270,19 @@ Vector3d Triangle::get_p3()
     return this->p3;
 }
 
+Vector3d Composite::get_center()
+{
+    return this->center;
+}
+
 FourPointsFace::FourPointsFace(Vector3d p1, Vector3d p2,
-                     Vector3d p3, Vector3d p4, Color color,
-                     IntensityColor dr, IntensityColor sr,
-                     IntensityColor er, float shininess) : Object(color, dr, sr, er, shininess)
+                               Vector3d p3, Vector3d p4, Color color,
+                               IntensityColor dr, IntensityColor sr,
+                               IntensityColor er, float shininess) : Object(color, dr, sr, er, shininess)
 {
     this->t1 = Triangle(p1, p2, p3);
     this->t2 = Triangle(p3, p4, p1);
+    this->center = this->t1.get_center().sum(this->t2.get_center()).divide(2);
 }
 
 Vector3d FourPointsFace::get_normal_vector(Vector3d intersection_point = Vector3d(0, 0, 0))
@@ -274,7 +298,7 @@ void FourPointsFace::apply_transformation(Matrix transformation)
 
 void FourPointsFace::apply_scale_transformation(float sx, float sy, float sz)
 {
-    Vector3d fixed_point = this->t1.get_p1();
+    Vector3d fixed_point = this->center;
     Matrix matrix_transformation = MatrixTransformations::scale(fixed_point, sx, sy, sz);
     this->t1.apply_transformation(matrix_transformation);
     this->t2.apply_transformation(matrix_transformation);
@@ -290,15 +314,111 @@ void FourPointsFace::apply_rotation_transformation(float theta, int axis)
 Intersection FourPointsFace::get_intersection(Ray ray)
 {
     Intersection intersec1 = this->t1.get_intersection(ray);
-    if (!intersec1.is_valid)
+    if (intersec1.is_valid)
     {
-        return this->t2.get_intersection(ray);
+        this->color = this->t1.color;
+        this->shininess = this->t1.shininess;
+        this->difuse_reflectivity = this->t1.difuse_reflectivity;
+        this->environment_reflectivity = this->t1.environment_reflectivity;
+        this->specular_reflectivity = this->t1.specular_reflectivity;
+        return intersec1;
+        
+    } 
+    
+    Intersection intersec2 = this->t2.get_intersection(ray);
+    if (intersec2.is_valid)
+    {
+        this->color = this->t2.color;
+        this->shininess = this->t2.shininess;
+        this->difuse_reflectivity = this->t2.difuse_reflectivity;
+        this->environment_reflectivity = this->t2.environment_reflectivity;
+        this->specular_reflectivity = this->t2.specular_reflectivity;
     }
-    return intersec1;
+    
+    return intersec2;
 }
 
 void FourPointsFace::apply_coordinate_change(Camera camera, int type_coord_change)
 {
     this->t1.apply_coordinate_change(camera, type_coord_change);
     this->t2.apply_coordinate_change(camera, type_coord_change);
+}
+
+Mesh::Mesh(vector<FourPointsFace> faces, Color color,
+           IntensityColor dr, IntensityColor sr,
+           IntensityColor er, float shininess) : faces(faces), Object(color, dr, sr, er, shininess)
+{
+    int count = 0;
+    Vector3d v(0, 0, 0);
+    for (auto &face : faces)
+    {
+        v = v.sum(face.get_center());
+        count++;
+    }
+
+    if (count == 0)
+    {
+        throw runtime_error("Malha inválida (não possui faces).");
+    }
+
+    this->center = v.divide(count);
+}
+
+void Mesh::apply_transformation(Matrix transformation)
+{
+    for (auto &face : this->faces)
+    {
+        face.apply_transformation(transformation);
+    }
+}
+
+void Mesh::apply_coordinate_change(Camera camera, int type_coord_change)
+{
+    for (auto &face : this->faces)
+    {
+        face.apply_coordinate_change(camera, type_coord_change);
+    }
+}
+
+void Mesh::apply_scale_transformation(float sx, float sy, float sz)
+{
+    Vector3d fixed_point = this->center;
+    Matrix matrix_transformation = MatrixTransformations::scale(fixed_point, sx, sy, sz);
+
+    for (auto& face : this->faces) {
+        face.apply_transformation(matrix_transformation);
+    }
+}
+
+void Mesh::apply_rotation_transformation(float theta, int axis)
+{
+    Matrix rotation_matrix = MatrixTransformations::rotation(theta, axis);
+    for (auto &face : this->faces)
+    {
+        face.apply_transformation(rotation_matrix);
+    }
+}
+
+Intersection Mesh::get_intersection(Ray ray) {
+    float t_min = INFINITY;
+    FourPointsFace face_min;
+
+    for (auto& face : this->faces) {
+        Intersection intersection = face.get_intersection(ray);
+        if (intersection.is_valid && intersection.time < t_min) {
+            t_min = intersection.time;
+            face_min = face;
+        }
+    }
+
+    if (t_min != INFINITY) {
+        this->color = face_min.color;
+        this->shininess = face_min.shininess;
+        this->difuse_reflectivity = face_min.difuse_reflectivity;
+        this->environment_reflectivity = face_min.environment_reflectivity;
+        this->specular_reflectivity = face_min.specular_reflectivity;
+        return Intersection(t_min, true);
+    }
+
+    return Intersection(t_min, false);
 }

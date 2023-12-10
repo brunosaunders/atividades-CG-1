@@ -80,7 +80,18 @@ namespace atividades_cg_1::objects {
         void apply_coordinate_change(Camera camera, int type_coord_change) override;
     };
 
-    class Triangle : public Object {
+    class Composite {
+        protected:
+            Vector3d center;
+        public:
+            
+            Composite(){}
+            Composite(Vector3d c) : center(c) {}
+
+            Vector3d get_center();
+    };
+
+    class Triangle : public Object, public Composite {
         protected:
             Vector3d p1;
             Vector3d p2;
@@ -91,8 +102,7 @@ namespace atividades_cg_1::objects {
             Triangle(Vector3d p1, Vector3d p2, 
             Vector3d p3, Color color=Color(255,255,255), 
             IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
-            IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10) : p1(p1), p2(p2), p3(p3), Object(color,dr, sr, er, shininess) {}
-
+            IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10);
             Vector3d get_normal_vector(Vector3d intersection_point) override;
 
             void apply_transformation(Matrix transformation) override;
@@ -106,18 +116,19 @@ namespace atividades_cg_1::objects {
             Vector3d get_p3();
 
             Intersection get_intersection(Ray ray) override;
-    };  
+    };
 
-    class FourPointsFace : public Object {
+    class FourPointsFace : public Object, public Composite {
         protected:
             Triangle t1;
             Triangle t2;
         
         public:
+        FourPointsFace() {}
             FourPointsFace(Vector3d p1, Vector3d p2,
-                     Vector3d p3, Vector3d p4, Color color = Color(255, 255, 255),
-                     IntensityColor dr = IntensityColor(.7, .7, .7), IntensityColor sr = IntensityColor(.7, .7, .7),
-                     IntensityColor er = IntensityColor(.7, .7, .7), float shininess = 10);
+                    Vector3d p3, Vector3d p4, Color color = Color(255, 255, 255),
+                    IntensityColor dr = IntensityColor(.7, .7, .7), IntensityColor sr = IntensityColor(.7, .7, .7),
+                    IntensityColor er = IntensityColor(.7, .7, .7), float shininess = 10);
 
             Vector3d get_normal_vector(Vector3d intersection_point) override;
 
@@ -128,6 +139,31 @@ namespace atividades_cg_1::objects {
             void apply_coordinate_change(Camera camera, int type_coord_change) override;
 
             Intersection get_intersection(Ray ray) override;
+
+            Triangle get_t1();
+            Triangle get_t2();
+
+    };
+
+    class Mesh : public Object, public Composite {
+        protected:
+            vector<FourPointsFace> faces;
+        public:
+
+            Mesh(vector<FourPointsFace> faces, Color color = Color(255, 255, 255),
+                    IntensityColor dr = IntensityColor(.7, .7, .7), IntensityColor sr = IntensityColor(.7, .7, .7),
+                    IntensityColor er = IntensityColor(.7, .7, .7), float shininess = 10);
+
+            Vector3d get_normal_vector(Vector3d intersection_point) override;
+
+            void apply_transformation(Matrix transformation) override;
+            void apply_scale_transformation(float sx, float sy, float sz) override;
+            void apply_rotation_transformation(float theta, int axis) override;
+
+            void apply_coordinate_change(Camera camera, int type_coord_change) override;
+
+            Intersection get_intersection(Ray ray) override;
+            
     };
 }
 
