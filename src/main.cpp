@@ -69,13 +69,13 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Plan *back_plan = new Plan(Vector3d(0, 0, -200), Vector3d(0,0,1), Color(255,255,255));
     Sphere *sphere = new Sphere(Vector3d(-19, 1, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
-    Cylinder *cylinder = new Cylinder(Vector3d(20,0, -100), Vector3d(20, 50, -100), 15);
+    Cylinder *cylinder = new Cylinder(Vector3d(20,0, -100), Vector3d(20, 50, -100), 15, Color(255,255,255));
     
-    // scene.push_object(sphere);
+    scene.push_object(sphere);
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
     // scene.push_object(triangle2);
-    scene.push_object(cylinder);
+    // scene.push_object(cylinder);
 
     // Mesh* cube = ObjFactory::create_cube();
     // scene.push_object(cube);

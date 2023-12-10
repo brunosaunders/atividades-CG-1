@@ -534,11 +534,10 @@ Vector3d Cylinder::get_normal_vector(Vector3d intersection_point, Intersection i
 
         return this->get_cylinder_dr();
     }
-
 }
 
 // Vector3d Cylinder::get_normal_vector(Vector3d intersection_point, Intersection intersection) {
-//     // return Vector3d();
+//     return Vector3d();
 //     Matrix u = this->get_cylinder_dr().as_matrix();
 //     Matrix P = Matrix::identity().minus(u.multiply(u.transposed()));
 //     Vector3d v = intersection_point.minus(this->base_center);
@@ -550,235 +549,68 @@ Vector3d Cylinder::get_normal_vector(Vector3d intersection_point, Intersection i
 Intersection Cylinder::get_intersection(Ray ray) {
 
     // w = P0 - centro_base
-    Vector3d w = ray.p1.minus(this->base_center);
-
     Vector3d dr = ray.get_dr();
+    // Vector3d d = ray.get_dr();
+
+    Vector3d u = this->get_cylinder_dr();
+    Vector3d s = ray.p1.minus(this->base_center);
+    // Vector3d v = (ray.p1.minus(this->base_center)).minus(u.multiply((ray.p1.minus(this->base_center)).scalar_product(u)));
+    Vector3d v = s.minus(u.multiply(s.scalar_product(u)));
+    Vector3d w = dr.minus(u.multiply(dr.scalar_product(u)));
+    // Vector3d w = ray.p1.minus(this->base_center);
+
     float cylinder_height = this->get_height();
 
-    Vector3d dc = this->get_cylinder_dr();
 
-    Plan base(this->base_center, dc),
-          topo(this->top_center, dc);
-
-    double delta = 0.0, // Delta da equação de 2º grau.
-           a = 0.0, b = 0.0, c = 0.0, // Coscientes da equação de 2º grau.
-           t_int = 0.0, // Distância do início do raio até o ponto de intersecção mais próximo.
-           t_int1 = 0.0, t_int2 = 0.0, // Distâncias do início do raio até os pontos de intersecção.
-           t_int_base = 0.0, // Distância do início do raio até o ponto de intersecção com a base do cilíndro.
-           t_int_topo = 0.0, // Distância do início do raio até o ponto de intersecção com o topo do cilíndro.
-
-           dr_escalar_dc = dr.scalar_product(dc), // Resultado do produto escalar da direção do raio com a direção do cilíndro.
-           w_escalar_dc = w.scalar_product(dc), // Resultado do produto escalar do vetor w com a direção do cilíndro.
-           v_escalar_dc = 0.0; // Resultado do produto escalar do vetor v (ponto_inicial_raio - centro_base) com a direção do cilíndro.
-
-    // Checando o raio é paralelo ao eixo do cilíndro.
-    if (std::abs(dr_escalar_dc) != 1.0) {
-
-        // a = direcao_raio . direcao_raio - (direcao_raio . direcao_cilindro)²
-        a = dr.scalar_product(dr) - std::pow(dr_escalar_dc, 2);
-
-        // b = 2(w . direcao_raio) - 2(w . direcao_cilindro)(direcao_raio . direcao_cilindro)
-        b = 2.0 * w.scalar_product(dr) - 2.0 * w_escalar_dc * dr_escalar_dc;
-
-        // c = (w . w) - (w . direcao_cilindro)² - raio_cilindro²
-        c = w.scalar_product(w) - std::pow(w_escalar_dc, 2) - std::pow(this->radius, 2);
-
-        delta = std::pow(b, 2) - 4.0 * a * c;
-
-        if (delta > 0.0) {
-
-            t_int1 = (-b + std::sqrt(delta)) / (2.0 * a);
-            t_int2 = (-b - std::sqrt(delta)) / (2.0 * a);
-
-            // Anotando se a primeira raíz é uma intersecção válida.
-            Vector3d P1 = ray.p1.sum(dr.multiply(t_int1));
-            v_escalar_dc = (P1.minus(this->base_center).scalar_product(dc));
-
-            if (0.0 > v_escalar_dc || v_escalar_dc > cylinder_height) {
-
-                t_int1 = -1.0;
-
-            }
-
-            // Anotando se a segunda raíz é uma intersecção válida.
-            Vector3d P2 = ray.p1.sum(dr.multiply(t_int2));
-            v_escalar_dc = (P2.minus(this->base_center).scalar_product(dc));
-
-            if (0.0 > v_escalar_dc || v_escalar_dc > cylinder_height) {
-
-                t_int2 = -1.0;
-
-            }
-
-            // Escolhendo a raíz que represente a intersecção válida mais próxima.
-
-            if (t_int1 >= 0.0 && t_int2 >= 0.0) {
-
-                if (t_int1 < t_int2) {
-
-                    t_int = t_int1;
-
-                } else {
-
-                    t_int = t_int2;
-
-                }
-
-            } else {
-
-                t_int_base = base.get_intersection(ray).time;
-                t_int_topo = topo.get_intersection(ray).time;
-
-                // Checando se a intersecção com a base do cilíndro é válida.
-                Vector3d P_base = ray.p1.sum(dr.multiply(t_int_base));
-                if (t_int_base >= 0.0 && (P_base).minus(this->base_center).size() > this->radius) {
-
-                    t_int_base = -1.0;
-
-                }
-
-                // Checando se a intersecção com o topo do cilíndro é válida.
-                Vector3d P_top = ray.p1.sum(dr.multiply(t_int_topo));
-                if (t_int_topo >= 0.0 && (P_top.minus(this->top_center)).size() > this->radius) {
-
-                    t_int_topo = -1.0;
-
-                }
-
-                // Checando se o raio intersectou a base e o topo ao mesmo tempo.
-                if (t_int_base >= 0.0 && t_int_topo >= 0.0) {
-
-                    // Anotando a intersecção mais próxima.
-                    if (t_int_base < t_int_topo) {
-
-                        t_int = t_int_base;
-
-                    } else {
-
-                        t_int = t_int_topo;
-
-                    }
-
-                } else {
-
-                    // Checando se o raio intersectou a base ou o topo ou nenhum dos dois.
-                    if (t_int_base >= 0.0) {
-
-                        t_int = t_int_base;
-
-                    } else if (t_int_topo >= 0.0) {
-
-                        t_int = t_int_topo;
-                        
-                    } else {
-                        
-                        t_int = -1.0;
-
-                    }
-
-                    // Checando se a base ou o topo foram intersectados.
-                    if (t_int >= 0.0) {
-
-                        // Checando qual das intersecções na superfíce do cilíndro é válida.
-                        if (t_int1 >= 0.0) {
-
-                            // Checando se a intersecção na superfície do cilíndro está mais próxima do que a intersecção na base ou no topo.
-                            if (t_int1 < t_int) {
-
-                                t_int = t_int1;
-
-                            }
-
-                        } else if (t_int2 >= 0.0) {
-
-                            // Checando se a intersecção na superfície do cilíndro está mais próxima do que a intersecção na base ou no topo.
-                            if (t_int2 < t_int) {
-
-                                t_int = t_int2;
-
-                            }
-
-                        }
-
-                    }
-
-                } 
-
-
-            }
-
-        } else if (delta == 0.0) {
-
-            // Calculando a única intersecção com o corpo do cilíndro.
-            t_int1 = -b / (2.0 * a);
-
-            Vector3d P_unique = ray.p1.sum(dr.multiply(t_int1));
-            v_escalar_dc = (P_unique.minus(this->base_center)).scalar_product(dc);
-
-            // Checando se a intersecção é válida.
-            if (0.0 <= v_escalar_dc && v_escalar_dc <= cylinder_height) {
-
-                t_int = t_int1;
-
-            } else {
-
-                t_int = -1.0;
-
-            }
-
-        } else {
-
-            t_int = -1.0;
-
+    float a = w.scalar_product(w);
+    float b = (v.scalar_product(w)) * 2;
+    float c = v.scalar_product(v) - pow(this->radius, 2);
+    
+    float delta = pow(b, 2) - 4*a*c;
+
+    if (delta < 0) {
+        return Intersection(-1, false);
+        // caso em que o raio pode passar pela base.
+    } else if (delta == 0) {
+        if (a == 0) {
+            return Intersection(-1, false); // é pra ser true
         }
 
+        float t_int = -b / (2*a);
+        return Intersection(t_int, true, this);
     } else {
+        float t1 = (-b + sqrt(delta)) / (2*a);
+        float t2 = (-b - sqrt(delta)) / (2*a);
 
-        t_int_base = base.get_intersection(ray).time;
-        t_int_topo = topo.get_intersection(ray).time;
+        Vector3d P1 = ray.p1.sum(dr.multiply(t1));
+        Vector3d P2 = ray.p1.sum(dr.multiply(t2));
 
-        // Anotando se a intersecção com a base do cilíndro é válida.
-        Vector3d P_base = ray.p1.sum(dr.multiply(t_int_base));
-        if (t_int_base >= 0.0 && P_base.minus(this->base_center).size() > this->radius) {
+        Vector3d W1 = P1.minus(this->base_center);
+        Vector3d W2 = P2.minus(this->base_center);
 
-            t_int_base = -1.0;
+        // Check if it is valid
+        Vector3d dc = this->get_cylinder_dr();
+        
+        float t1_scalar_product_check = W1.scalar_product(dc);
+        float t2_scalar_product_check = W2.scalar_product(dc);
 
+        float height = this->get_height();
+
+        bool t1_valid = t1_scalar_product_check >= 0 && t1_scalar_product_check <= height;
+        bool t2_valid = t2_scalar_product_check >= 0 && t2_scalar_product_check <= height;
+        Intersection intersection_min(INFINITY, false);
+
+        if (t1_valid) {
+            intersection_min = Intersection(t1, true, this);
+            // cout << "t1 ";
         }
 
-        // Anotando se a intersecção com o topo do cilíndro é válida.
-        Vector3d P_topo = ray.p1.sum(dr.multiply(t_int_topo));
-        if (t_int_topo >= 0.0 && P_topo.minus(this->top_center).size() > this->radius) {
-            t_int_topo = -1.0;
-
+        if (t2_valid && t2 < intersection_min.time) {
+            intersection_min = Intersection(t2, true, this);
+            // cout << "t2 ";
         }
-
-        if (t_int_base >= 0.0 && t_int_topo >= 0.0) {
-
-            if (t_int_base < t_int_topo) {
-
-                t_int = t_int_base;
-
-            } else {
-
-                t_int = t_int_topo;
-
-            }
-
-        } else if (t_int_base >= 0.0) {
-
-            t_int = t_int_base;
-
-        } else if (t_int_topo >= 0.0) {
-
-            t_int = t_int_topo;
-            
-        } else {
-
-            t_int = -1.0;
-
-        }
-
+        return intersection_min;
     }
 
-    return Intersection(t_int, std::abs(t_int + 1.0) > 1.0e-12, this);
+    // return Intersection(t_int, std::abs(t_int + 1.0) > 1.0e-12, this);
 }

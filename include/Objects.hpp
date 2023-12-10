@@ -136,7 +136,7 @@ namespace atividades_cg_1::objects {
         Vector3d top_center;
         float radius;
 
-        Cylinder(Vector3d base_center, Vector3d top_center, float radius, Color color=Color(255,255,255), 
+        Cylinder(Vector3d base_center, Vector3d top_center, float radius, Color color=Color(200,200,200), 
             IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
             IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10)
                 : Object(color, difuse_reflectivity, specular_reflectivity, environment_reflectivity, shininess), base_center(base_center), 
