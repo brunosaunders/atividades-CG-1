@@ -8,21 +8,35 @@
 #include "Objects.hpp"
 #include "Camera.hpp"
 #include "Scene.hpp"
+#include "Reader.hpp"
 
 using namespace std;
 
+using namespace atividades_cg_1::reader;
 using namespace atividades_cg_1::algebra;
 using namespace atividades_cg_1::objects;
 using namespace atividades_cg_1::camera;
 using namespace atividades_cg_1::scene;
+
+void run_tests();
+int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height);
+
+int main(int argc, char *argv[])
+{
+    float window_width = 60;
+    float window_height = 60;
+    // window width and height will be 1.0 meter. We will render everything in a SDL window with pixes specified.
+    run_tests();
+    return render_picture(500, 500, 500, 500, window_width, window_height);
+}
 
 
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height)
 {
     Vector3d look_at(0,0, -100);
     Vector3d view_up(0,1000,-100);
-    Vector3d eye(50, 0, -30);
-    float focal_distance = 30.0;
+    Vector3d eye(0, 0, 0);
+    float focal_distance = 30;
 
     Camera camera(look_at, eye, view_up, focal_distance, window_width, window_height, n_cols, n_rows);
     // Window *cretos_window = new Window(window_width, window_height, n_cols, n_rows, 0, 0, -30);
@@ -54,15 +68,15 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Plan *back_plan = new Plan(Vector3d(0, 0, -200), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
     Sphere *sphere = new Sphere(Vector3d(-19, 1, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
+    
+    
     scene.push_object(sphere);
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
     scene.push_object(triangle2);
 
-
-    // scene.push_object(new Triangle(Vector3d(-0.9, 0, -1), Vector3d(0.9, 0, -1), Vector3d(0, .9,-1)));
-    // sphere->apply_scale_transformation(2,2,2);
-
+    Mesh* cube = ObjFactory::create_cube();
+    // scene.push_object(cube);
 
     // Initialize library
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -206,14 +220,6 @@ void test_vectorial_product() {
     }
 }
 
-
 void run_tests() {
     test_vectorial_product();
-}
-
-int main(int argc, char *argv[])
-{
-    // window width and height will be 1.0 meter. We will render everything in a SDL window with pixes specified.
-    run_tests();
-    return render_picture(500, 500, 500, 500, 60, 60);
 }

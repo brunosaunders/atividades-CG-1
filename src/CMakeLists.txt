@@ -4,5 +4,6 @@ target_sources(${PROJECT_NAME} PRIVATE
     Objects.cpp
     Scene.cpp
     Algebra.cpp
+    Reader.cpp
     main.cpp
 )
