@@ -227,6 +227,10 @@ namespace atividades_cg_1::objects {
             IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
             IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10);
 
+        void apply_coordinate_change(Camera camera, int type_coord_change) override;
+        void apply_transformation(Matrix transformation) override;
+        void apply_scale_transformation(float sx, float sy, float sz) override;
+        void apply_rotation_transformation(float theta, int axis) override;
 
         // Se o cone for intersectado pelo Raio "raio", retorna o escalar que é a distância entre o ponto inicial do raio e o ponto de intersecção mais próximo do ponto inicial do raio.
         // Se não houver intersecção, retorna -1.

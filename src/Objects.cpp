@@ -637,142 +637,39 @@ Intersection Cone::get_intersection(Ray ray) {
     // float cos_theta = 
 }
 
-// Intersection Cone::get_intersection(Ray ray) {
 
-//     // w = raio.p0 - base_center
-//     Vector3d w = ray.p1.minus(this->base_center);
+void Cone::apply_coordinate_change(Camera camera, int type_coord_change) {
+    switch (type_coord_change)
+    {
+    case CHANGE_FROM_WORLD_TO_CAMERA:
+        this->base_center = camera.transform_vector_from_world_to_camera(this->base_center);
+        this->vertix = camera.transform_vector_from_world_to_camera(this->vertix);
+        break;
 
-//     Plan base(this->base_center, this->direction,
-//                     IntensityColor(.7, .7, .7), IntensityColor(.7, .7, .7),
-//                     IntensityColor(.7, .7, .7), 10, Color(255,255,255));
+    case CHANGE_FROM_CAMERA_TO_WORLD:
+        this->base_center = camera.transform_vector_from_camera_to_world(this->base_center);
+        this->vertix = camera.transform_vector_from_camera_to_world(this->vertix);
+        break;
+    default:
+        throw runtime_error("Tipo de mudança de coordenada inválida");
+        break;
+    }
+}
 
-//     double delta = 0.0, // Delta da equação de 2º grau.
-//            a = 0.0, b = 0.0, c = 0.0, // Coscientes da equação de 2º grau.
-//            t_int = 0.0, // Distância do início do raio até o ponto de intersecção mais próximo.
-//            t_int1 = 0.0, t_int2 = 0.0, // Distâncias do início do raio até os pontos de intersecção.
-//            t_int_base = 0.0, // Distância do início do raio até o ponto de intersecção com a base do cone.
+void Cone::apply_transformation(Matrix transformation) {
+    this->base_center = transformation.multiply(this->base_center.as_matrix()).as_vector();
+    this->vertix = transformation.multiply(this->vertix.as_matrix()).as_vector();
+}
 
-//            beta = std::pow(this->height, 2) / std::pow(this->radius, 2), // beta = height_cone² / raio_cone²
-//            dr_escalar_dc = ray.get_dr().scalar_product(this->direction), // Resultado do produto escalar da direção do raio com a direção do cone.
-//            w_escalar_dr = w.scalar_product(ray.get_dr()), // Resultado do produto escalar do vetor com o vetor direção do raio.
-//            w_escalar_dc = w.scalar_product(this->direction), // Resultado do produto escalar do vetor w com o vetor direção do cone.
-//            v_escalar_dc = 0.0; // Resultado do produto escalar do vetor v (ponto_inicial_raio - base_center) com a direção do cone.
+void Cone::apply_scale_transformation(float sx, float sy, float sz) {
+    Matrix matrix = MatrixTransformations::scale(this->base_center, sx, sy, sz);
+    Cone::apply_transformation(matrix);
+}
 
-//     // a = beta - beta*(dr . dc)² - (dr . dc)²
-//     a = beta - std::pow(dr_escalar_dc, 2)*(beta + 1.0);
-
-//     // b = 2*beta*(w . dr) - 2*beta*(w . dc)*(dr . dc) - 2*(w . dc)*(dr . dc) + 2*height_cone*(dr . dc)
-//     b = 2.0*(beta*(w_escalar_dr - w_escalar_dc*dr_escalar_dc) - w_escalar_dc*dr_escalar_dc + this->height*dr_escalar_dc);
-    
-//     // c = beta*(w . w) - beta*(w . dc)² - (w . dc)² - height_cone² + 2*height_cone*(w . dc)
-//     c = beta*w.scalar_product(w) - std::pow(w_escalar_dc, 2)*(beta + 1.0) - std::pow(this->height, 2) + 2.0*this->height*w_escalar_dc;
-    
-//     delta = std::pow(b, 2) - 4.0 * a * c;
-
-//     // Checando se houve intersecção.
-//     if (delta > 0.0) {
-
-//         t_int1 = (-b + std::sqrt(delta)) / (2.0 * a);
-//         t_int2 = (-b - std::sqrt(delta)) / (2.0 * a);
-
-//         // Checando se a primeira raíz é uma intersecção válida.
-//         Vector3d P1 = ray.p1.sum(ray.get_dr().multiply(t_int1));
-//         v_escalar_dc = P1.minus(this->base_center).scalar_product(this->direction);  
-
-//         if (0.0 > v_escalar_dc || v_escalar_dc > this->height) {
-
-//             t_int1 = -1.0;
-
-//         }
-
-//         Vector3d P2 = ray.p1.sum(ray.get_dr().multiply(t_int2));
-
-//         // Checando se a segunda raíz é uma intersecção válida.
-//         v_escalar_dc = P2.minus(this->base_center).scalar_product(this->direction);  
-
-//         if (0.0 > v_escalar_dc || v_escalar_dc > this->height) {
-
-//             t_int2 = -1.0;
-
-//         }
-
-//         // Escolhendo a raíz que represente a intersecção válida mais próxima.
-
-//         if (t_int1 >= 0.0 && t_int2 >= 0.0) {
-
-//             if (t_int1 < t_int2) {
-
-//                 t_int = t_int1;
-
-//             } else {
-
-//                 t_int = t_int2;
-
-//             }
-
-//         } else if (t_int1 >= 0.0 || t_int2 >= 0.0) {
-
-//             // Anotando o t_int válido no corpo do cone.
-//             if (t_int1 >= 0.0) {
-
-//                 t_int = t_int1;
-
-//             } else {
-
-//                 t_int = t_int2;
-
-//             }
-
-//             // Calculando a intersecção no plano da base.
-//             t_int_base = base.get_intersection(ray).time;
-
-//             Vector3d P_base = ray.p1.sum(ray.get_dr().multiply(t_int_base));
-//             // Anotando se a intersecção com a base do cone é válida.
-//             if (t_int_base >= 0.0 && (P_base.minus(this->base_center).size() > this->radius)) {
-
-//                 t_int_base = -1.0;
-
-//             }
-
-//             // Checando se a intersecção na base do cone foi válida e se ela é mais próxima que a intersecção já anotada do corpo.
-//             if (t_int_base >= 0.0 && t_int_base < t_int) {
-
-//                 t_int = t_int_base;
-
-//             }
-
-//         } else {
-
-//             t_int = -1.0;
-
-//         }
-
-//     } else if (delta == 0.0) {
-
-//         t_int1 = -b / (2.0 * a);
-
-//         Vector3d P1 = ray.p1.sum(ray.get_dr().multiply(t_int1));
-//         v_escalar_dc = (P1.minus(this->base_center).scalar_product(this->direction));
-
-//         if (0.0 <= v_escalar_dc && v_escalar_dc <= this->height) {
-
-//             t_int = t_int1;
-
-//         } else {
-
-//             t_int = -1.0;
-
-//         }
-
-//     } else {
-
-//         t_int = -1.0;
-
-//     }
-
-//     return Intersection(t_int, t_int != -1.0, this);
-
-// }
+void Cone::apply_rotation_transformation(float theta, int axis) {
+    Matrix matrix = MatrixTransformations::rotation(theta, axis);
+    Cone::apply_transformation(matrix);
+}
 
 Vector3d Cone::get_normal_vector(Vector3d intersection_point, Intersection intersection) {
 

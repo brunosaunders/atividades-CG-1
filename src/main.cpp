@@ -84,7 +84,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Plan *front_plan = new Plan(Vector3d(0, 0, 0), Vector3d(0, 0, -1), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
     Plan *roof_plan = new Plan(Vector3d(0, 300, 0), Vector3d(0, -1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
 
-    Sphere *sphere = new Sphere(Vector3d(0, sphere_radius + 45, -50), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
+    Sphere *sphere = new Sphere(Vector3d(0, sphere_radius + 45, -50), sphere_radius, Color(212, 175,55), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     // Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
 
     scene.push_object(sphere);
@@ -104,20 +104,34 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     float x_cylinder = -60;
     scene.push_object(new Cylinder(Vector3d(x_cylinder,-70, z_cylinder), Vector3d(x_cylinder,80, z_cylinder), 20, Color(150,150,150)));
 
-    float z_cone2 = -310;
-    float x_cone2 = -45;
-    float y_cone2 = 100;
-    Cone *cone2 = new Cone(Vector3d(x_cone2, y_cone2-80, z_cone2), Vector3d(x_cone2, y_cone2, z_cone2 + 10), 35, Color(0, 238,85));
+    float z_cone2 = -150;
+    float x_cone2 = -80;
+    float y_cone2 = 140;
+
+    IntensityColor cone2_k_d = IntensityColor(.1, .2, .2);
+    IntensityColor cone2_k_e = IntensityColor(.5, .2, .2);
+    IntensityColor cone2_k_a = IntensityColor(.3, .7, .3);
+    Color cone2_cor(0,240, 25);
+
+
+    Cone *cone2 = new Cone(Vector3d(x_cone2, y_cone2-80, z_cone2), Vector3d(x_cone2, y_cone2, z_cone2 + 10), 35, cone2_cor, cone2_k_d, cone2_k_e, cone2_k_a, 6);
     // Cone *cone = new Cone(Vector3d(20, 0, -150), Vector3d(20, 0, -400), 0.01, 20);
     scene.push_object(cone2);
     // Mesh *cube = ObjFactory::create_cube();
     // scene.push_object(cube);
 
-    scene.push_object(new Sphere(Vector3d(-110, 72, -150), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
-    scene.push_object(new Sphere(Vector3d(-94, 100, -150), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
-    scene.push_object(new Sphere(Vector3d(-94, 100, -141), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
-    scene.push_object(new Sphere(Vector3d(-100, 85, -136), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
-    scene.push_object(new Sphere(Vector3d(-108, 74, -135), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
+    IntensityColor bolinhas_natal_source_intensity = IntensityColor(1, .2, .2);
+    IntensityColor bolinhas_natal_k_d = IntensityColor(.2, .2, .2);
+    IntensityColor bolinhas_natal_k_e = IntensityColor(1, 1, 1);
+    IntensityColor bolinhas_natal_k_a = IntensityColor(1, .7, .2);
+    float shininess = 27;
+    Color bolinhas_cor(222, 0, 0);
+
+    scene.push_object(new Sphere(Vector3d(-110, 72, -150), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
+    scene.push_object(new Sphere(Vector3d(-94, 100, -150), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
+    scene.push_object(new Sphere(Vector3d(-94, 100, -141), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
+    scene.push_object(new Sphere(Vector3d(-100, 85, -136), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
+    scene.push_object(new Sphere(Vector3d(-108, 74, -135), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
 
     // Initialize library
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
