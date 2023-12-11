@@ -71,7 +71,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Plan *front_plan = new Plan(Vector3d(0, 0, 0), Vector3d(0, 0, -1), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
     Plan *roof_plan = new Plan(Vector3d(0, 300, 0), Vector3d(0, -1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
 
-    Sphere *sphere = new Sphere(Vector3d(0, sphere_radius, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
+    Sphere *sphere = new Sphere(Vector3d(0, sphere_radius + 45, -50), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     // Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
 
     scene.push_object(sphere);
@@ -83,7 +83,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     scene.push_object(roof_plan);
 
     Mesh *cube = ObjFactory::create_cube();
-    // scene.push_object(cube);
+    scene.push_object(cube);
 
     // Initialize library
     if (SDL_Init(SDL_INIT_VIDEO) < 0)

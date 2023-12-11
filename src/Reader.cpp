@@ -64,11 +64,12 @@ Mesh* ObjFactory::create_cube() {
     ObjReader reader;
     Mesh* mesh = reader.read_obj_file("../blender/cube.obj");
 
-    Matrix translation_matrix = MatrixTransformations::translation(0,2,-100);
-    Matrix scale_matrix = MatrixTransformations::scale(mesh->get_center(), 30,30,1);
-    mesh->apply_rotation_transformation(M_PI/6, Y_AXIS);
-    mesh->apply_rotation_transformation(M_PI/6, X_AXIS);
-    mesh->apply_transformation(translation_matrix);
+    Matrix translation_matrix = MatrixTransformations::translation(0,30,-50);
+    Matrix scale_matrix = MatrixTransformations::scale(mesh->get_center(), 30,30,30);
+    // mesh->apply_rotation_transformation(M_PI/6, Y_AXIS);
+    // mesh->apply_rotation_transformation(M_PI/6, X_AXIS);
     mesh->apply_transformation(scale_matrix);
+    mesh->apply_transformation(translation_matrix);
+    mesh->get_center().print();
     return mesh;
 }
