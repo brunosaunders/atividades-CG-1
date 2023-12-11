@@ -693,3 +693,59 @@ Vector3d Cone::get_normal_vector(Vector3d intersection_point, Intersection inter
 
     }
 }
+
+void Cylinder::apply_coordinate_change(Camera camera, int type_coord_change) {
+    switch (type_coord_change)
+        {
+        case CHANGE_FROM_WORLD_TO_CAMERA:
+            this->base_center = camera.transform_vector_from_world_to_camera(this->base_center);
+            this->top_center = camera.transform_vector_from_world_to_camera(this->top_center);
+            break;
+
+        case CHANGE_FROM_CAMERA_TO_WORLD:
+            this->base_center = camera.transform_vector_from_camera_to_world(this->base_center);
+            this->top_center = camera.transform_vector_from_camera_to_world(this->top_center);
+            break;
+        default:
+            throw runtime_error("Tipo de mudança de coordenada inválida");
+            break;
+        }
+}
+void Cylinder::apply_transformation(Matrix transformation) {
+    this->base_center = transformation.multiply(this->base_center.as_matrix()).as_vector();
+    this->top_center = transformation.multiply(this->top_center.as_matrix()).as_vector();
+}
+
+void Cylinder::apply_scale_transformation(float sx, float sy, float sz) {
+    Matrix matrix = MatrixTransformations::scale(this->base_center, sx, sy, sz);
+    Cylinder::apply_transformation(matrix);
+}
+void Cylinder::apply_rotation_transformation(float theta, int axis) {
+    Matrix matrix = MatrixTransformations::rotation(theta, axis);
+    Cylinder::apply_transformation(matrix);
+}
+
+void Triangle::arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) {
+    Matrix matrix = MatrixTransformations::arbitrary_rotation(theta, p1, p2);
+    Triangle::apply_transformation(matrix);
+}
+
+void FourPointsFace::arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) {
+    Matrix matrix = MatrixTransformations::arbitrary_rotation(theta, p1, p2);
+    FourPointsFace::apply_transformation(matrix);
+}
+
+void Mesh::arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) {
+    Matrix matrix = MatrixTransformations::arbitrary_rotation(theta, p1, p2);
+    Mesh::apply_transformation(matrix);
+}
+
+void Cone::arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) {
+    Matrix matrix = MatrixTransformations::arbitrary_rotation(theta, p1, p2);
+    Cone::apply_transformation(matrix);
+}
+
+void Cylinder::arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) {
+    Matrix matrix = MatrixTransformations::arbitrary_rotation(theta, p1, p2);
+    Cylinder::apply_transformation(matrix);
+}

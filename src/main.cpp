@@ -100,11 +100,11 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     // Cone *cone = new Cone(Vector3d(20, 0, -150), Vector3d(20, 0, -400), 0.01, 20);
     scene.push_object(cone);
 
-    float z_cylinder = -400;
+    float z_cylinder = -200;
     float x_cylinder = -60;
     scene.push_object(new Cylinder(Vector3d(x_cylinder,-70, z_cylinder), Vector3d(x_cylinder,80, z_cylinder), 20, Color(150,150,150)));
 
-    float z_cone2 = -150;
+    float z_cone2 = -200;
     float x_cone2 = -80;
     float y_cone2 = 140;
 
@@ -114,7 +114,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Color cone2_cor(0,240, 25);
 
 
-    Cone *cone2 = new Cone(Vector3d(x_cone2, y_cone2-80, z_cone2), Vector3d(x_cone2, y_cone2, z_cone2 + 10), 35, cone2_cor, cone2_k_d, cone2_k_e, cone2_k_a, 6);
+    Cone *cone2 = new Cone(Vector3d(x_cone2, y_cone2-90, z_cone2), Vector3d(x_cone2, y_cone2, z_cone2 + 10), 35, cone2_cor, cone2_k_d, cone2_k_e, cone2_k_a, 6);
     // Cone *cone = new Cone(Vector3d(20, 0, -150), Vector3d(20, 0, -400), 0.01, 20);
     scene.push_object(cone2);
     // Mesh *cube = ObjFactory::create_cube();
@@ -127,11 +127,11 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     float shininess = 27;
     Color bolinhas_cor(222, 0, 0);
 
-    scene.push_object(new Sphere(Vector3d(-110, 72, -150), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
-    scene.push_object(new Sphere(Vector3d(-94, 100, -150), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
-    scene.push_object(new Sphere(Vector3d(-94, 100, -141), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
-    scene.push_object(new Sphere(Vector3d(-100, 85, -136), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
-    scene.push_object(new Sphere(Vector3d(-108, 74, -135), 10, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
+    scene.push_object(new Sphere(Vector3d(-110, 74, -200), 7, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
+    scene.push_object(new Sphere(Vector3d(-94, 100, -200), 7, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
+    scene.push_object(new Sphere(Vector3d(-94, 100, -180), 7, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
+    scene.push_object(new Sphere(Vector3d(-100, 89, -185), 7, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
+    scene.push_object(new Sphere(Vector3d(-110, 74, -170), 7, bolinhas_cor, bolinhas_natal_k_d, bolinhas_natal_k_e, bolinhas_natal_k_a, shininess));
 
     // Initialize library
     if (SDL_Init(SDL_INIT_VIDEO) < 0)

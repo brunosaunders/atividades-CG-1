@@ -46,6 +46,7 @@ namespace atividades_cg_1::objects {
         virtual void apply_transformation(Matrix transformation) {};
         virtual void apply_scale_transformation(float sx, float sy, float sz) {};
         virtual void apply_rotation_transformation(float theta, int axis) {};
+        virtual void arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) {};
 
         virtual Intersection get_intersection(Ray ray) { return Intersection(0.0, false); }
         virtual Vector3d get_normal_vector(Vector3d intersec_point, Intersection intersection) { return Vector3d();};
@@ -120,6 +121,7 @@ namespace atividades_cg_1::objects {
             void apply_rotation_transformation(float theta, int axis) override;
 
             void apply_coordinate_change(Camera camera, int type_coord_change) override;
+            void arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) override;
 
             Vector3d get_p1();
             Vector3d get_p2();
@@ -147,6 +149,8 @@ namespace atividades_cg_1::objects {
             void apply_scale_transformation(float sx, float sy, float sz) override;
             void apply_rotation_transformation(float theta, int axis) override;
             void apply_coordinate_change(Camera camera, int type_coord_change) override;
+            void arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) override;
+
             void print() override;
 
             Intersection get_intersection(Ray ray) override;
@@ -172,6 +176,7 @@ namespace atividades_cg_1::objects {
             void apply_transformation(Matrix transformation) override;
             void apply_scale_transformation(float sx, float sy, float sz) override;
             void apply_rotation_transformation(float theta, int axis) override;
+            void arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) override;
 
             void apply_coordinate_change(Camera camera, int type_coord_change) override;
             Vector3d get_center() override;
@@ -197,6 +202,12 @@ namespace atividades_cg_1::objects {
 
             Vector3d get_cylinder_dr();
             float get_height(); 
+
+            void apply_coordinate_change(Camera camera, int type_coord_change) override;
+            void apply_transformation(Matrix transformation) override;
+            void apply_scale_transformation(float sx, float sy, float sz) override;
+            void apply_rotation_transformation(float theta, int axis) override;
+            void arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) override;
 
             Vector3d get_light_vector(Vector3d intersec_point, Intersection intersection, SourceOfLight source_of_light) {return Vector3d();};
 
@@ -231,6 +242,7 @@ namespace atividades_cg_1::objects {
         void apply_transformation(Matrix transformation) override;
         void apply_scale_transformation(float sx, float sy, float sz) override;
         void apply_rotation_transformation(float theta, int axis) override;
+        void arbitrary_rotation(float theta, Vector3d p1, Vector3d p2) override;
 
         // Se o cone for intersectado pelo Raio "raio", retorna o escalar que é a distância entre o ponto inicial do raio e o ponto de intersecção mais próximo do ponto inicial do raio.
         // Se não houver intersecção, retorna -1.
