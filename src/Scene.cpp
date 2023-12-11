@@ -87,12 +87,14 @@ void Scene::dealloc_objects()
 Scene::Scene(Color bg_color, SourceOfLight source, IntensityColor environment_light, Camera* camera)
         : background_color(bg_color), source_of_light(source), environment_light(environment_light), coordinates_type(WORLD_COORDINATES) {
     this->set_camera(camera);
+    this->should_update = true;
 }
 
 void Scene::push_object(Object *obj)
 {
     obj->apply_coordinate_change(*this->camera, CHANGE_FROM_WORLD_TO_CAMERA);
     objects.push_back(obj);
+    this->should_update = true;
 }
 
 void Scene::set_eye(Vector3d eye) {
@@ -101,7 +103,7 @@ void Scene::set_eye(Vector3d eye) {
 }
 
 void Scene::calculate_everything() {
-    camera->window.should_update = true; // Please check if we have to pass camera as reference.
+    this->should_update = true; // Please check if we have to pass camera as reference.
 
     // Apply Camera matrix(W->C) to each object
     if (this->coordinates_type == WORLD_COORDINATES) {
@@ -113,7 +115,7 @@ void Scene::calculate_everything() {
         this->coordinates_type = CAMERA_COORDINATES;
         return;
     }
-
+    cout << "ah ";
     // Apply Old Camera matrix(C->W) to each object
     // Apply New Camera matrix(W->C) to each object
     for (auto& obj : this->objects) {
@@ -123,13 +125,11 @@ void Scene::calculate_everything() {
 }
 
 void Scene::set_camera(Camera* camera) {
-    cout << "eae";
-    camera->window.should_update = true; // Please check if we have to pass camera as reference.
+    this->should_update = true; // Please check if we have to pass camera as reference.
 
     // Apply Camera matrix(W->C) to each object
     if (this->coordinates_type == WORLD_COORDINATES) {
         for (auto& obj : this->objects) {
-            cout << "oba";
             obj->apply_coordinate_change(*camera, CHANGE_FROM_WORLD_TO_CAMERA);
         }
         this->camera = camera;

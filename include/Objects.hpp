@@ -99,6 +99,7 @@ namespace atividades_cg_1::objects {
             Composite(){}
 
             Vector3d virtual get_center(){return Vector3d();};
+            void virtual set_color(Color color) {};
     };
 
     class Triangle : public Object, public Composite {
@@ -148,7 +149,7 @@ namespace atividades_cg_1::objects {
             void apply_rotation_transformation(float theta, int axis) override;
             void apply_coordinate_change(Camera camera, int type_coord_change) override;
             void print() override;
-
+            void set_color(Color color) override;
             Intersection get_intersection(Ray ray) override;
 
             Triangle get_t1();
@@ -175,7 +176,7 @@ namespace atividades_cg_1::objects {
 
             void apply_coordinate_change(Camera camera, int type_coord_change) override;
             Vector3d get_center() override;
-
+            void set_color(Color color) override;
             Intersection get_intersection(Ray ray) override;
             
     };

@@ -19,6 +19,17 @@ using namespace atividades_cg_1::objects;
 using namespace atividades_cg_1::camera;
 using namespace atividades_cg_1::scene;
 
+// class Initializer {
+//     public:
+//         static int count;
+//         Camera* camera;
+//         Scene scene;
+//         void init(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height) {
+//             ++count;
+
+//         }
+// };
+
 
 void run_tests();
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height);
@@ -43,7 +54,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     float width_ratio = 1;  // sdl_width / (float)n_cols;
     float height_ratio = 1; // sdl_height / (float)n_rows;
 
-    IntensityColor source_intensity = IntensityColor(.7, .7, .7);
+    IntensityColor source_intensity = IntensityColor(.9, .9, .9);
     IntensityColor sphere_k_d = IntensityColor(.7, .2, .2);
     IntensityColor sphere_k_e = IntensityColor(.7, .2, .2);
     IntensityColor sphere_k_a = IntensityColor(.7, .2, .2);
@@ -84,8 +95,8 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     scene.push_object(new Cylinder(Vector3d(-220,-70,-500), Vector3d(-220,60,-500), 30, Color(150,150,150)));
 
 
-    // Mesh *cube = ObjFactory::create_cube();
-    // scene.push_object(cube);
+    Mesh *cube = ObjFactory::create_cube();
+    scene.push_object(cube);
 
     // Initialize library
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -120,7 +131,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
     bool isRunning = true;
     SDL_Event event;
-
+    bool GUI_visible = false;
     // using pointers to save memory inside the loop
     Ray *ray = new Ray();
     Vector3d *center_of_small_rectangle = new Vector3d();
@@ -130,22 +141,113 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
         // Event listening
         while (SDL_PollEvent(&event))
         {
+            if(event.type == SDL_MOUSEBUTTONDOWN)
+            {
+                if(event.button.button == SDL_BUTTON_RIGHT)
+                {
+                    if(!GUI_visible)
+                    {
+                        int mainWinX, mainWinY;
+                        SDL_GetWindowPosition(window, &mainWinX, &mainWinY);
+                        SDL_Window *window_GUI = SDL_CreateWindow(
+                                "Escolher Perspectiva",
+                                mainWinX + sdl_width,
+                                mainWinY,
+                                sdl_width - 150,
+                                sdl_width - 150,
+                                SDL_WINDOW_SHOWN
+                        );
+
+                        if(!window_GUI)
+                        {
+                            SDL_Log("Criação da janela GUI falhou! SDL_ERRO: %s", SDL_GetError());
+                            SDL_Quit();
+                            return 1;
+                        }
+
+                        SDL_Renderer *renderer_GUI = SDL_CreateRenderer(window_GUI, -1, SDL_RENDERER_ACCELERATED);
+
+                        if(!renderer_GUI)
+                        {
+                            SDL_Log("Criação do renderer GUI falhou! SDL_Error: %s", SDL_GetError());
+                            SDL_DestroyWindow(window);
+                            SDL_Quit();
+                            return 1;
+                        }
+
+                        bool GUI_Running = true;
+                        SDL_Event GUI_event;
+                        while(GUI_Running)
+                        {
+                            while(SDL_PollEvent(&GUI_event))
+                            {
+                                if (GUI_event.type == SDL_WINDOWEVENT && GUI_event.window.event == SDL_WINDOWEVENT_CLOSE)
+                                {
+                                    GUI_Running = false;
+                                }
+                                else if (GUI_event.type == SDL_MOUSEBUTTONDOWN)
+                                {
+                                    int mouseX = GUI_event.button.x, mouseY = GUI_event.button.y;
+                                    if(mouseX >= 80 && mouseX <= 280 && mouseY >= 50 && mouseY <= 100)
+                                    {
+                                        scene.camera->window.center.z -= 5;
+                                        scene.camera->window.should_update = true;
+                                        std::printf("Botão Verde clicado!\n");
+                                    }
+                                    if(mouseX >= 80 && mouseX <= 280 && mouseY >= 120 && mouseY <= 170)
+                                    {
+                                        std::printf("Botão Azul clicado!\n");
+                                    }
+                                    if(mouseX >= 80 && mouseX <= 280 && mouseY >= 190 && mouseY <= 240)
+                                    {
+                                        std::printf("Botão Vermelho clicado!\n");
+                                    }
+                                }
+
+
+                            }
+                            SDL_RenderClear(renderer_GUI);
+                            SDL_SetRenderDrawColor(renderer_GUI, 255, 255, 255, 255);
+
+                            SDL_Rect button1Rect = {80, 50, 200, 50};
+                            SDL_SetRenderDrawColor(renderer_GUI, 0, 255, 0, 255);
+                            SDL_RenderFillRect(renderer_GUI, &button1Rect);
+
+                            SDL_Rect button2Rect = {80, 50 + 70, 200, 50};
+                            SDL_SetRenderDrawColor(renderer_GUI, 0, 0, 255, 255);
+                            SDL_RenderFillRect(renderer_GUI, &button2Rect);
+
+                            SDL_Rect button3Rect = {80, 50 + 140, 200, 50};
+                            SDL_SetRenderDrawColor(renderer_GUI, 255, 0, 0, 255);
+                            SDL_RenderFillRect(renderer_GUI, &button3Rect);
+
+                            SDL_SetRenderDrawColor(renderer_GUI, 255, 255, 255, 255);
+                            SDL_RenderPresent(renderer_GUI);
+                            GUI_visible = true;
+                        }
+                        SDL_DestroyRenderer(renderer_GUI);
+                        SDL_DestroyWindow(window_GUI);
+                        GUI_visible = false;
+                    }
+                }
+            }
+
             switch (event.type)
             {
             case SDL_QUIT:
                 isRunning = false;
-                scene.camera->window.should_update = true;
+                scene.should_update = false;
                 break;
             case SDL_KEYDOWN:
                 // Handle key press event
                 if (event.key.keysym.sym == SDLK_1)
                 {
-                    cout << "belezaa\n";
-                    cout << scene.camera->window.should_update;
-                    scene.set_eye(Vector3d(-200, eye.y, eye.z));
-                    scene.camera->window.should_update = true;
-                    scene.camera->eye.print();
-                    cout << scene.camera->window.should_update;
+                    // cout << "belezaa\n";
+                    // cout << scene.should_update;
+                    // scene.set_eye(Vector3d(-200, eye.y, eye.z));
+                    // // scene.camera->window.should_update = true;
+                    // scene.camera->eye.print();
+                    // cout << scene.camera->window.should_update;
                     // Do something when '1' key is pressed
                 }
                 break;
@@ -160,7 +262,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 
         // Just draw the colors saved in camera->window.windows_colors
-        if (!scene.camera->window.should_update)
+        if (!scene.should_update)
         {
             for (int l = 0; l < n_rows; l++)
             {
@@ -204,7 +306,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
         // Lastly, we update the window with the renderer we just painted
         SDL_RenderPresent(renderer);
-        camera->window.should_update = false;
+        scene.should_update = false;
     }
 
     // Free the memory

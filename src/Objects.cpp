@@ -350,6 +350,12 @@ void FourPointsFace::print() {
     this->get_center().print();
 }
 
+void FourPointsFace::set_color(Color color) {
+    this->color = color;
+    this->t1.color = color;
+    this->t2.color = color;
+}
+
 Mesh::Mesh(vector<FourPointsFace> faces, Color color,
            IntensityColor dr, IntensityColor sr,
            IntensityColor er, float shininess) : faces(faces), Object(color, dr, sr, er, shininess)
@@ -418,6 +424,12 @@ void Mesh::print() {
 
 Vector3d Mesh::get_normal_vector(Vector3d intersec_point, Intersection intersection) {
     return intersection.intersepted_object->get_normal_vector(intersec_point, intersection);
+}
+
+void Mesh::set_color(Color color) {
+    for (auto& face : this->faces) {
+        face.color = color;
+    }
 }
 
 Intersection Mesh::get_intersection(Ray ray) {

@@ -30,6 +30,8 @@ namespace atividades_cg_1::scene {
         SourceOfLight source_of_light;
         IntensityColor environment_light;
 
+        bool should_update;
+
 
         Scene(Color bg_color, SourceOfLight source, IntensityColor environment_light, Camera *camera);
        
