@@ -78,6 +78,22 @@ Matrix Vector3d::as_matrix() {
     return Matrix(result);
 }
 
+Matrix Matrix::transposed() {
+    vector<vector<float>> matrix_transposed;
+    if (this->dimension.n == this->dimension.m) {
+        matrix_transposed = vector<vector<float>>(this->dimension.n, vector<float>(this->dimension.n, 0)); // initialize matrix.
+        
+    } else {
+        matrix_transposed = vector<vector<float>>(this->dimension.m, vector<float>(this->dimension.n, 0)); // initialize matrix.
+    }
+
+    for (int i=0; i < this->dimension.m; i++) {
+        for (int j=0; j < this->dimension.n; j++) {
+            matrix_transposed[i][j] = this->matrix[j][i];
+        }
+    }
+    return matrix_transposed;
+}
 
 float Ray::size()
 {

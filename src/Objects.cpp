@@ -350,11 +350,11 @@ void FourPointsFace::print() {
     this->get_center().print();
 }
 
-void FourPointsFace::set_color(Color color) {
-    this->color = color;
-    this->t1.color = color;
-    this->t2.color = color;
-}
+// void FourPointsFace::set_color(Color color) {
+//     this->color = color;
+//     this->t1.color = color;
+//     this->t2.color = color;
+// }/
 
 Mesh::Mesh(vector<FourPointsFace> faces, Color color,
            IntensityColor dr, IntensityColor sr,
@@ -426,11 +426,11 @@ Vector3d Mesh::get_normal_vector(Vector3d intersec_point, Intersection intersect
     return intersection.intersepted_object->get_normal_vector(intersec_point, intersection);
 }
 
-void Mesh::set_color(Color color) {
-    for (auto& face : this->faces) {
-        face.color = color;
-    }
-}
+// void Mesh::set_color(Color color) {
+//     for (auto& face : this->faces) {
+//         face.color = color;
+//     }
+// }
 
 Intersection Mesh::get_intersection(Ray ray) {
 
@@ -476,8 +476,7 @@ float Cylinder::get_height() {
 
 
 Vector3d Cylinder::get_normal_vector(Vector3d intersection_point, Intersection intersection) {
-    // return Vector3d(0, 15, -85);
-    // Vector3d v, p_v, h;
+    return Vector3d(-10000, 10000, 10000);
     float v_escalar_dc, erro = 1e-12;
 
     Vector3d v = intersection_point.minus(this->base_center);
@@ -499,7 +498,7 @@ Vector3d Cylinder::get_normal_vector(Vector3d intersection_point, Intersection i
 
 Intersection Cylinder::get_intersection(Ray ray) {
 
-    // w = P0 - centro_base
+    // w = P0 - base_center
     Vector3d dr = ray.get_dr();
     // Vector3d d = ray.get_dr();
 
@@ -561,5 +560,239 @@ Intersection Cylinder::get_intersection(Ray ray) {
             // cout << "t2 ";
         }
         return intersection_min;
+    }
+}
+
+Cone::Cone(Vector3d base_center, Vector3d vertix, float radius, Color color, 
+            IntensityColor dr, IntensityColor sr,
+            IntensityColor er, float shininess) : Object(color,dr,sr,er,shininess) {
+
+    Vector3d v_height = vertix.minus(base_center);
+
+    this->base_center = base_center;
+    this->vertix = vertix;
+    this->direction = v_height.get_vector_normalized();
+    this->radius = radius;
+    this->height = v_height.size();
+    float geratriz = sqrt(pow(this->height, 2) + pow(this->radius, 2));
+    this->cos_theta = this->height / geratriz;
+}
+
+Cone::Cone(Vector3d base_center, Vector3d direction, float radius, float height, Color color, 
+            IntensityColor dr, IntensityColor sr,
+            IntensityColor er, float shininess) : Object(color,dr,sr,er,shininess) {
+
+    this->base_center = base_center;
+    this->vertix = base_center.sum((direction.multiply(height)));
+    this->direction = direction;
+    this->radius = radius;
+    this->height = height;
+    float geratriz = sqrt(pow(this->height, 2) + pow(this->radius, 2));
+    this->cos_theta = this->height / geratriz;
+}
+
+Intersection Cone::get_intersection(Ray ray) {
+    Vector3d d = ray.get_dr();
+    Vector3d n = this->direction;
+    Vector3d v = this->vertix.minus(ray.p1);
+
+    float a = pow(d.scalar_product(n),2) - (d.scalar_product(d))*pow(this->cos_theta,2);
+    float b = 2*((v.scalar_product(d))*pow(this->cos_theta,2) - (v.scalar_product(n) * (d.scalar_product(n))));
+    float c = pow(v.scalar_product(n), 2) - (v.scalar_product(v) * pow(this->cos_theta, 2));
+    float delta = pow(b,2) - 4*a*c;
+
+    if (delta < 0) {
+        return Intersection(-1.0, false);
+    }
+
+    if (delta == 0) {
+        float t = -b / (2*a);
+        return Intersection(t, true);
+    }
+
+    float t1 = (-b + sqrt(delta)) / (2*a);
+    float t2 = (-b - sqrt(delta)) / (2*a);
+    
+    Vector3d P1 = ray.p1.sum(d.multiply(t1));
+    Vector3d P2 = ray.p1.sum(d.multiply(t2));
+
+    Intersection intersection_min(INFINITY, false);
+
+    float p1_value = (this->vertix.minus(P1)).scalar_product(n);
+    float p2_value = (this->vertix.minus(P2)).scalar_product(n);
+
+    if (p1_value >= 0 && p1_value <= this->height) {
+        intersection_min = Intersection(t1, true, this);
+    }
+
+    if (p2_value >= 0 && p2_value <= this->height && t2 <= intersection_min.time) {
+        intersection_min = Intersection(t2, true, this);
+    }
+
+    return intersection_min;
+
+    
+    
+
+    // float cos_theta = 
+}
+
+// Intersection Cone::get_intersection(Ray ray) {
+
+//     // w = raio.p0 - base_center
+//     Vector3d w = ray.p1.minus(this->base_center);
+
+//     Plan base(this->base_center, this->direction,
+//                     IntensityColor(.7, .7, .7), IntensityColor(.7, .7, .7),
+//                     IntensityColor(.7, .7, .7), 10, Color(255,255,255));
+
+//     double delta = 0.0, // Delta da equação de 2º grau.
+//            a = 0.0, b = 0.0, c = 0.0, // Coscientes da equação de 2º grau.
+//            t_int = 0.0, // Distância do início do raio até o ponto de intersecção mais próximo.
+//            t_int1 = 0.0, t_int2 = 0.0, // Distâncias do início do raio até os pontos de intersecção.
+//            t_int_base = 0.0, // Distância do início do raio até o ponto de intersecção com a base do cone.
+
+//            beta = std::pow(this->height, 2) / std::pow(this->radius, 2), // beta = height_cone² / raio_cone²
+//            dr_escalar_dc = ray.get_dr().scalar_product(this->direction), // Resultado do produto escalar da direção do raio com a direção do cone.
+//            w_escalar_dr = w.scalar_product(ray.get_dr()), // Resultado do produto escalar do vetor com o vetor direção do raio.
+//            w_escalar_dc = w.scalar_product(this->direction), // Resultado do produto escalar do vetor w com o vetor direção do cone.
+//            v_escalar_dc = 0.0; // Resultado do produto escalar do vetor v (ponto_inicial_raio - base_center) com a direção do cone.
+
+//     // a = beta - beta*(dr . dc)² - (dr . dc)²
+//     a = beta - std::pow(dr_escalar_dc, 2)*(beta + 1.0);
+
+//     // b = 2*beta*(w . dr) - 2*beta*(w . dc)*(dr . dc) - 2*(w . dc)*(dr . dc) + 2*height_cone*(dr . dc)
+//     b = 2.0*(beta*(w_escalar_dr - w_escalar_dc*dr_escalar_dc) - w_escalar_dc*dr_escalar_dc + this->height*dr_escalar_dc);
+    
+//     // c = beta*(w . w) - beta*(w . dc)² - (w . dc)² - height_cone² + 2*height_cone*(w . dc)
+//     c = beta*w.scalar_product(w) - std::pow(w_escalar_dc, 2)*(beta + 1.0) - std::pow(this->height, 2) + 2.0*this->height*w_escalar_dc;
+    
+//     delta = std::pow(b, 2) - 4.0 * a * c;
+
+//     // Checando se houve intersecção.
+//     if (delta > 0.0) {
+
+//         t_int1 = (-b + std::sqrt(delta)) / (2.0 * a);
+//         t_int2 = (-b - std::sqrt(delta)) / (2.0 * a);
+
+//         // Checando se a primeira raíz é uma intersecção válida.
+//         Vector3d P1 = ray.p1.sum(ray.get_dr().multiply(t_int1));
+//         v_escalar_dc = P1.minus(this->base_center).scalar_product(this->direction);  
+
+//         if (0.0 > v_escalar_dc || v_escalar_dc > this->height) {
+
+//             t_int1 = -1.0;
+
+//         }
+
+//         Vector3d P2 = ray.p1.sum(ray.get_dr().multiply(t_int2));
+
+//         // Checando se a segunda raíz é uma intersecção válida.
+//         v_escalar_dc = P2.minus(this->base_center).scalar_product(this->direction);  
+
+//         if (0.0 > v_escalar_dc || v_escalar_dc > this->height) {
+
+//             t_int2 = -1.0;
+
+//         }
+
+//         // Escolhendo a raíz que represente a intersecção válida mais próxima.
+
+//         if (t_int1 >= 0.0 && t_int2 >= 0.0) {
+
+//             if (t_int1 < t_int2) {
+
+//                 t_int = t_int1;
+
+//             } else {
+
+//                 t_int = t_int2;
+
+//             }
+
+//         } else if (t_int1 >= 0.0 || t_int2 >= 0.0) {
+
+//             // Anotando o t_int válido no corpo do cone.
+//             if (t_int1 >= 0.0) {
+
+//                 t_int = t_int1;
+
+//             } else {
+
+//                 t_int = t_int2;
+
+//             }
+
+//             // Calculando a intersecção no plano da base.
+//             t_int_base = base.get_intersection(ray).time;
+
+//             Vector3d P_base = ray.p1.sum(ray.get_dr().multiply(t_int_base));
+//             // Anotando se a intersecção com a base do cone é válida.
+//             if (t_int_base >= 0.0 && (P_base.minus(this->base_center).size() > this->radius)) {
+
+//                 t_int_base = -1.0;
+
+//             }
+
+//             // Checando se a intersecção na base do cone foi válida e se ela é mais próxima que a intersecção já anotada do corpo.
+//             if (t_int_base >= 0.0 && t_int_base < t_int) {
+
+//                 t_int = t_int_base;
+
+//             }
+
+//         } else {
+
+//             t_int = -1.0;
+
+//         }
+
+//     } else if (delta == 0.0) {
+
+//         t_int1 = -b / (2.0 * a);
+
+//         Vector3d P1 = ray.p1.sum(ray.get_dr().multiply(t_int1));
+//         v_escalar_dc = (P1.minus(this->base_center).scalar_product(this->direction));
+
+//         if (0.0 <= v_escalar_dc && v_escalar_dc <= this->height) {
+
+//             t_int = t_int1;
+
+//         } else {
+
+//             t_int = -1.0;
+
+//         }
+
+//     } else {
+
+//         t_int = -1.0;
+
+//     }
+
+//     return Intersection(t_int, t_int != -1.0, this);
+
+// }
+
+Vector3d Cone::get_normal_vector(Vector3d intersection_point, Intersection intersection) {
+
+    Vector3d vertix_point, n, v;
+    double v_escalar_dc, erro = 1e-12;
+
+    vertix_point = this->vertix.minus(intersection_point);
+    v = intersection_point.minus(this->base_center);
+    v_escalar_dc = v.scalar_product(this->direction);
+
+    if (0.0 + erro < v_escalar_dc) {
+
+        n = vertix_point.vectorial_product(this->direction);
+        n = n.vectorial_product(vertix_point);
+
+        return n.get_vector_normalized();
+
+    } else {
+
+        return this->direction.multiply(-1.0);
+
     }
 }

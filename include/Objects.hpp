@@ -99,7 +99,6 @@ namespace atividades_cg_1::objects {
             Composite(){}
 
             Vector3d virtual get_center(){return Vector3d();};
-            void virtual set_color(Color color) {};
     };
 
     class Triangle : public Object, public Composite {
@@ -149,7 +148,7 @@ namespace atividades_cg_1::objects {
             void apply_rotation_transformation(float theta, int axis) override;
             void apply_coordinate_change(Camera camera, int type_coord_change) override;
             void print() override;
-            void set_color(Color color) override;
+
             Intersection get_intersection(Ray ray) override;
 
             Triangle get_t1();
@@ -176,29 +175,65 @@ namespace atividades_cg_1::objects {
 
             void apply_coordinate_change(Camera camera, int type_coord_change) override;
             Vector3d get_center() override;
-            void set_color(Color color) override;
+
             Intersection get_intersection(Ray ray) override;
             
     };
 
     class Cylinder: public Object {
+        public:
+            Vector3d base_center;
+            Vector3d top_center;
+            float radius;
+
+            Cylinder() {}
+            Cylinder(Vector3d base_center, Vector3d top_center, float radius, Color color, 
+                IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
+                IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10);
+
+            Vector3d get_normal_vector(Vector3d intersection_point, Intersection Intersection) override;
+
+            Intersection get_intersection(Ray ray) override;
+
+            Vector3d get_cylinder_dr();
+            float get_height(); 
+
+            Vector3d get_light_vector(Vector3d intersec_point, Intersection intersection, SourceOfLight source_of_light) {return Vector3d();};
+
+            IntensityColor get_difuse_contribution(Vector3d intersec_point, Intersection intersection, SourceOfLight source_of_light) { return IntensityColor();};
+
+            IntensityColor get_specular_contribution(Vector3d intersec_point, Intersection intersection, Vector3d eye_point, SourceOfLight source_of_light) { return IntensityColor();};
+            // Vector3d get_center() override;
+        };
+
+
+    class Cone : public Object {
+
     public:
         Vector3d base_center;
-        Vector3d top_center;
+        Vector3d vertix;
+        Vector3d direction;
         float radius;
+        float height;
+        float cos_theta;
 
-        Cylinder() {}
-        Cylinder(Vector3d base_center, Vector3d top_center, float radius, Color color, 
+        Cone(){}
+
+        Cone(Vector3d base_center, Vector3d vertix, float radius, Color color=Color(0,255,0), 
             IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
             IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10);
 
-        Vector3d get_normal_vector(Vector3d intersection_point, Intersection Intersection) override;
+        Cone(Vector3d base_center, Vector3d direction, float radius, float height, Color color=Color(0,255,0), 
+            IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
+            IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10);
 
+
+        // Se o cone for intersectado pelo Raio "raio", retorna o escalar que é a distância entre o ponto inicial do raio e o ponto de intersecção mais próximo do ponto inicial do raio.
+        // Se não houver intersecção, retorna -1.
         Intersection get_intersection(Ray ray) override;
 
-        Vector3d get_cylinder_dr();
-        float get_height(); 
-        // Vector3d get_center() override;
+        // Retorna o vetor unitário normal a superfície do cone num ponto.
+        Vector3d get_normal_vector(Vector3d intersection_point, Intersection intersection) override;
     };
 
 }

@@ -71,6 +71,6 @@ Mesh* ObjFactory::create_cube() {
     mesh->apply_transformation(scale_matrix);
     mesh->apply_transformation(translation_matrix);
     mesh->get_center().print();
-    mesh->set_color(Color(180,20,20));
+    // mesh->set_color(Color(180,20,20));
     return mesh;
 }

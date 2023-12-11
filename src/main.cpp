@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
 
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height)
 {
+    // Vector3d look_at(-250, 100, -0);
+    // Vector3d eye(-250, 100, -399);
     Vector3d look_at(0, 20, -100);
     Vector3d view_up(0, 1000000, -100);
     Vector3d eye(-399, 100, -100);
@@ -88,15 +90,34 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     scene.push_object(sphere);
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
-    scene.push_object(left_plan);
+    scene.push_object(left_plan);   
     scene.push_object(right_plan);
     scene.push_object(front_plan);
     scene.push_object(roof_plan);
-    scene.push_object(new Cylinder(Vector3d(-220,-70,-500), Vector3d(-220,60,-500), 30, Color(150,150,150)));
 
+    float z_cone = -400;
+    Cone *cone = new Cone(Vector3d(55, 70, z_cone), Vector3d(55, 120, z_cone + 10), 20, Color(238, 0,85));
+    // Cone *cone = new Cone(Vector3d(20, 0, -150), Vector3d(20, 0, -400), 0.01, 20);
+    scene.push_object(cone);
 
-    Mesh *cube = ObjFactory::create_cube();
-    scene.push_object(cube);
+    float z_cylinder = -400;
+    float x_cylinder = -60;
+    scene.push_object(new Cylinder(Vector3d(x_cylinder,-70, z_cylinder), Vector3d(x_cylinder,80, z_cylinder), 20, Color(150,150,150)));
+
+    float z_cone2 = -310;
+    float x_cone2 = -45;
+    float y_cone2 = 100;
+    Cone *cone2 = new Cone(Vector3d(x_cone2, y_cone2-80, z_cone2), Vector3d(x_cone2, y_cone2, z_cone2 + 10), 35, Color(0, 238,85));
+    // Cone *cone = new Cone(Vector3d(20, 0, -150), Vector3d(20, 0, -400), 0.01, 20);
+    scene.push_object(cone2);
+    // Mesh *cube = ObjFactory::create_cube();
+    // scene.push_object(cube);
+
+    scene.push_object(new Sphere(Vector3d(-110, 72, -150), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
+    scene.push_object(new Sphere(Vector3d(-94, 100, -150), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
+    scene.push_object(new Sphere(Vector3d(-94, 100, -141), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
+    scene.push_object(new Sphere(Vector3d(-100, 85, -136), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
+    scene.push_object(new Sphere(Vector3d(-108, 74, -135), 10, Color(255, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10));
 
     // Initialize library
     if (SDL_Init(SDL_INIT_VIDEO) < 0)

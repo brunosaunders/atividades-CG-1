@@ -46,7 +46,7 @@ namespace atividades_cg_1::algebra
 
         Matrix multiply_scalar(float v);
         Matrix divide_scalar(float v);
-
+        Matrix transposed();
         Vector3d as_vector();
         void print();
     };
