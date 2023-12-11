@@ -33,10 +33,10 @@ int main(int argc, char *argv[])
 
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height)
 {
-    Vector3d look_at(0,0, -100);
-    Vector3d view_up(0,1000,-100);
-    Vector3d eye(0, 0, 0);
-    float focal_distance = 30;
+    Vector3d look_at(400,100, -200);
+    Vector3d view_up(-390,1000000,-100);
+    Vector3d eye(-390, 100, -100);
+    float focal_distance = 1;
 
     Camera camera(look_at, eye, view_up, focal_distance, window_width, window_height, n_cols, n_rows);
     // Window *cretos_window = new Window(window_width, window_height, n_cols, n_rows, 0, 0, -30);
@@ -48,7 +48,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     IntensityColor sphere_k_e = IntensityColor(.7, .2, .2);
     IntensityColor sphere_k_a = IntensityColor(.7, .2, .2);
 
-    SourceOfLight pontual_light(source_intensity, Vector3d(0, 60, -30));
+    SourceOfLight pontual_light(source_intensity, Vector3d(0, 100, -100));
     IntensityColor environment_light_intensity = IntensityColor(0.3, 0.3, 0.3); // Come from every direction uniformly
 
     Scene scene(Color(30, 30, 30), pontual_light, environment_light_intensity, camera);
@@ -64,16 +64,24 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     
     Matrix translation_matrix = MatrixTransformations::translation(10, 10, 0);
     
-    Plan *floor_plan = new Plan(Vector3d(0, sphere_radius*(-1), 0), Vector3d(0, 1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
-    Plan *back_plan = new Plan(Vector3d(0, 0, -200), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
-    Sphere *sphere = new Sphere(Vector3d(-19, 1, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
-    Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
+    Plan *floor_plan = new Plan(Vector3d(0, 0, 0), Vector3d(0, 1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
+    Plan *back_plan = new Plan(Vector3d(0, 0, -400), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
+    Plan *left_plan = new Plan(Vector3d(-400, 0, -100), Vector3d(1,0,0), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(0,255,0));
+    Plan *right_plan = new Plan(Vector3d(400, 0, -100), Vector3d(-1,0,0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
+    Plan *front_plan = new Plan(Vector3d(0, 0, 0), Vector3d(0,0,-1), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
+    Plan *roof_plan = new Plan(Vector3d(0, 400, 0), Vector3d(0,-1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
+    
+    Sphere *sphere = new Sphere(Vector3d(0, sphere_radius, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
+    // Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
     
     
     scene.push_object(sphere);
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
-    scene.push_object(triangle2);
+    scene.push_object(left_plan);
+    scene.push_object(right_plan);
+    scene.push_object(front_plan);
+    scene.push_object(roof_plan);
 
     Mesh* cube = ObjFactory::create_cube();
     // scene.push_object(cube);
@@ -130,8 +138,8 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
             if (event.type == SDL_KEYUP)
             { 
 
-                Matrix m = MatrixTransformations::arbitrary_rotation(M_PI/3, Vector3d(0,0,-100), Vector3d(0,20,-100));
-                triangle2->apply_transformation(m);
+                // Matrix m = MatrixTransformations::arbitrary_rotation(M_PI/3, Vector3d(0,0,-100), Vector3d(0,20,-100));
+                // triangle2->apply_transformation(m);
 
                 // sphere->apply_transformation(translation_matrix);
                 // triangle2->apply_scale_transformation(1.1, 1.1, 1.1);
