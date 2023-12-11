@@ -207,7 +207,10 @@ Matrix MatrixTransformations::translation(float tx, float ty, float tz) {
     0 0 0 1
     */
 
-    vector<vector<float>> result{vector<float>{1,0,0,tx}, vector<float>{0,1,0,ty}, vector<float>{0,0,1,tz}, vector<float>{0,0,0,1}};
+    vector<vector<float>> result{
+        vector<float>{1,0,0,tx}, vector<float>{0,1,0,ty}, 
+        vector<float>{0,0,1,tz}, vector<float>{0,0,0,1}
+        };
     return Matrix(result);
 }
 
@@ -220,7 +223,11 @@ Matrix MatrixTransformations::scale(Vector3d fixed_point, float sx, float sy, fl
     0  0 0     1
     */
 
-    vector<vector<float>> result{vector<float>{sx,0,0,(1-sx)*fixed_point.x}, vector<float>{0,sy,0,(1-sy)*fixed_point.y}, vector<float>{0,0,sz,(1-sz)*fixed_point.z}, vector<float>{0,0,0,1}};
+    vector<vector<float>> result{
+        vector<float>{sx,0,0,(1-sx)*fixed_point.x}, 
+        vector<float>{0,sy,0,(1-sy)*fixed_point.y}, 
+        vector<float>{0,0,sz,(1-sz)*fixed_point.z}, 
+        vector<float>{0,0,0,1}};
     return Matrix(result);
 }
 

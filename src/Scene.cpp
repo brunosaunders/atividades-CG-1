@@ -103,11 +103,13 @@ void Scene::push_object(Object *obj)
 
 
 void Scene::set_camera(Camera camera) {
+    cout << "eae";
     camera.window.should_update = true; // Please check if we have to pass camera as reference.
 
     // Apply Camera matrix(W->C) to each object
     if (this->coordinates_type == WORLD_COORDINATES) {
         for (auto& obj : this->objects) {
+            cout << "oba";
             obj->apply_coordinate_change(camera, CHANGE_FROM_WORLD_TO_CAMERA);
         }
         this->camera = camera;

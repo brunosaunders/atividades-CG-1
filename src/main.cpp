@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <thread>
 
 #include "Color.hpp"
 #include "Algebra.hpp"
@@ -18,6 +19,62 @@ using namespace atividades_cg_1::objects;
 using namespace atividades_cg_1::camera;
 using namespace atividades_cg_1::scene;
 
+// struct ThreadArgs {
+//    Scene* scene;
+// //    int arg2;
+// };
+
+// class AsyncCin
+// {
+//     static std::string val;
+//     static int hasval;
+//     static int thread(void *a)
+//     {
+//         ThreadArgs* args = static_cast<ThreadArgs*>(a);
+//         std::cin >> val;
+
+//         // args->scene->eye.print();
+//         if (val == "1") {
+//             cout << "Val = 1\n";
+//             Camera camera = args->scene->get_camera();
+
+//             Vector3d eye = Vector3d(camera.eye.x + 10, camera.eye.y, camera.eye.z);
+//             args->scene->set_camera(Camera(camera.look_at, eye, camera.view_up, camera.focal_distance, camera.window.width, camera.window.height, camera.window.cols, camera.window.rows));
+//             // args->camera->eye.apply_transformation(MatrixTransformations::translation(10,1,1));
+//             // args->camera->eye.print();
+//             // args->camera->window.should_update = true;
+//         }
+//         // cout << val;
+//         hasval = 2;
+//         return 0;
+//     }
+
+// public:
+//     static bool begininput(Scene* scene)
+//     {
+//         if (hasval != 0)
+//             return false;
+
+//         hasval = 1;
+
+//         ThreadArgs args = {scene};
+//         SDL_CreateThread(thread, "ConsoleInput", &args);
+//         return true;
+//     }
+//     static bool hasinput()
+//     {
+//         return hasval == 2;
+//     }
+//     static std::string reapinput()
+//     {
+//         hasval = false;
+//         return val;
+//     }
+// };
+
+// int AsyncCin::hasval = 0;
+// std::string AsyncCin::val = "";
+
 void run_tests();
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height);
 
@@ -27,20 +84,24 @@ int main(int argc, char *argv[])
     float window_height = 60;
     // window width and height will be 1.0 meter. We will render everything in a SDL window with pixes specified.
     run_tests();
-    return render_picture(500, 500, 500, 500, window_width, window_height);
-}
+    // thread t()
+    thread t(render_picture, 500, 500, 500, 500, window_width, window_height);
 
+    t.join();
+    // t.
+    return 1;
+}
 
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height)
 {
-    Vector3d look_at(400,100, -200);
-    Vector3d view_up(-390,1000000,-100);
+    Vector3d look_at(400, 100, -200);
+    Vector3d view_up(-390, 1000000, -100);
     Vector3d eye(-390, 100, -100);
     float focal_distance = 1;
 
     Camera camera(look_at, eye, view_up, focal_distance, window_width, window_height, n_cols, n_rows);
     // Window *cretos_window = new Window(window_width, window_height, n_cols, n_rows, 0, 0, -30);
-    float width_ratio = 1; // sdl_width / (float)n_cols;
+    float width_ratio = 1;  // sdl_width / (float)n_cols;
     float height_ratio = 1; // sdl_height / (float)n_rows;
 
     IntensityColor source_intensity = IntensityColor(.7, .7, .7);
@@ -61,20 +122,19 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     IntensityColor back_plan_k_difuse = IntensityColor(.3, .3, .7);
     IntensityColor back_plan_k_specular = IntensityColor(0, 0, 0);
     IntensityColor back_plan_k_environment = IntensityColor(.3, .3, .7);
-    
+
     Matrix translation_matrix = MatrixTransformations::translation(10, 10, 0);
-    
-    Plan *floor_plan = new Plan(Vector3d(0, 0, 0), Vector3d(0, 1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
-    Plan *back_plan = new Plan(Vector3d(0, 0, -400), Vector3d(0,0,1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255,255,255));
-    Plan *left_plan = new Plan(Vector3d(-400, 0, -100), Vector3d(1,0,0), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(0,255,0));
-    Plan *right_plan = new Plan(Vector3d(400, 0, -100), Vector3d(-1,0,0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
-    Plan *front_plan = new Plan(Vector3d(0, 0, 0), Vector3d(0,0,-1), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
-    Plan *roof_plan = new Plan(Vector3d(0, 400, 0), Vector3d(0,-1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50,25,199));
-    
+
+    Plan *floor_plan = new Plan(Vector3d(0, 0, 0), Vector3d(0, 1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
+    Plan *back_plan = new Plan(Vector3d(0, 0, -400), Vector3d(0, 0, 1), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(255, 255, 255));
+    Plan *left_plan = new Plan(Vector3d(-400, 0, -100), Vector3d(1, 0, 0), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(0, 255, 0));
+    Plan *right_plan = new Plan(Vector3d(400, 0, -100), Vector3d(-1, 0, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
+    Plan *front_plan = new Plan(Vector3d(0, 0, 0), Vector3d(0, 0, -1), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
+    Plan *roof_plan = new Plan(Vector3d(0, 400, 0), Vector3d(0, -1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
+
     Sphere *sphere = new Sphere(Vector3d(0, sphere_radius, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     // Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
-    
-    
+
     scene.push_object(sphere);
     scene.push_object(floor_plan);
     scene.push_object(back_plan);
@@ -83,7 +143,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     scene.push_object(front_plan);
     scene.push_object(roof_plan);
 
-    Mesh* cube = ObjFactory::create_cube();
+    Mesh *cube = ObjFactory::create_cube();
     // scene.push_object(cube);
 
     // Initialize library
@@ -126,31 +186,56 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
     while (isRunning)
     {
+        // // Begin input
+        // AsyncCin::begininput(&scene);
+
+        // // // Check if there is input
+        // if (AsyncCin::hasinput())
+        // {
+        //     AsyncCin::reapinput();
+        // }
+
         // Event listening
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_QUIT)
+            switch (event.type)
             {
+            case SDL_QUIT:
                 isRunning = false;
                 camera.window.should_update = true;
+                break;
+            case SDL_KEYDOWN:
+                // Handle key press event
+                if (event.key.keysym.sym == SDLK_1)
+                {
+                    cout << "belezaa\n";
+                    // Do something when '1' key is pressed
+                }
+                break;
+            default:
+                break;
             }
+            // if (event.type == SDL_QUIT)
+            // {
+               
+            // }
 
-            if (event.type == SDL_KEYUP)
-            { 
+            // if (event.type == SDL_KEYUP)
+            // {
 
-                // Matrix m = MatrixTransformations::arbitrary_rotation(M_PI/3, Vector3d(0,0,-100), Vector3d(0,20,-100));
-                // triangle2->apply_transformation(m);
+            //     // Matrix m = MatrixTransformations::arbitrary_rotation(M_PI/3, Vector3d(0,0,-100), Vector3d(0,20,-100));
+            //     // triangle2->apply_transformation(m);
 
-                // sphere->apply_transformation(translation_matrix);
-                // triangle2->apply_scale_transformation(1.1, 1.1, 1.1);
+            //     // sphere->apply_transformation(translation_matrix);
+            //     // triangle2->apply_scale_transformation(1.1, 1.1, 1.1);
 
-                // triangle2->apply_transformation(translation_matrix);
-                // triangle2->apply_rotation_transformation(M_PI/18, Y_AXIS);
+            //     // triangle2->apply_transformation(translation_matrix);
+            //     // triangle2->apply_rotation_transformation(M_PI/18, Y_AXIS);
 
-                // camera.window.center.z += 0.05;
-                // cout << camera.window.center << endl;
-                camera.window.should_update = true;
-            }
+            //     // camera.window.center.z += 0.05;
+            //     // cout << camera.window.center << endl;
+            //     camera.window.should_update = true;
+            // }
         }
 
         // Good practice
@@ -183,13 +268,13 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
             for (int c = 0; c < n_cols; c++)
             {
-                float x = - camera.window.width / 2 + (camera.window.dx / 2) + (camera.window.dx * c); // Creto's system
+                float x = -camera.window.width / 2 + (camera.window.dx / 2) + (camera.window.dx * c); // Creto's system
 
                 center_of_small_rectangle->x = x;
                 center_of_small_rectangle->y = y;
                 center_of_small_rectangle->z = camera.window.center.z;
 
-                ray->p1 = Vector3d(0,0,0); // Eye in Camera's system
+                ray->p1 = Vector3d(0, 0, 0); // Eye in Camera's system
                 ray->p2 = *center_of_small_rectangle;
 
                 camera.window.windows_colors[l][c] = scene.get_color_to_draw(*ray);
@@ -217,17 +302,19 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     return 0;
 }
 
-
-void test_vectorial_product() {
-    Vector3d v1(2,0,5);
+void test_vectorial_product()
+{
+    Vector3d v1(2, 0, 5);
     Vector3d v2(1, 1, 8);
 
     Vector3d result(-5, -11, 2);
-    if (!result.equals(v1.vectorial_product(v2))) {
+    if (!result.equals(v1.vectorial_product(v2)))
+    {
         throw logic_error("vectorial_product failed");
     }
 }
 
-void run_tests() {
+void run_tests()
+{
     test_vectorial_product();
 }
