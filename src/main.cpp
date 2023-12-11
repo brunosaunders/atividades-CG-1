@@ -19,87 +19,26 @@ using namespace atividades_cg_1::objects;
 using namespace atividades_cg_1::camera;
 using namespace atividades_cg_1::scene;
 
-// struct ThreadArgs {
-//    Scene* scene;
-// //    int arg2;
-// };
-
-// class AsyncCin
-// {
-//     static std::string val;
-//     static int hasval;
-//     static int thread(void *a)
-//     {
-//         ThreadArgs* args = static_cast<ThreadArgs*>(a);
-//         std::cin >> val;
-
-//         // args->scene->eye.print();
-//         if (val == "1") {
-//             cout << "Val = 1\n";
-//             Camera camera = args->scene->get_camera();
-
-//             Vector3d eye = Vector3d(camera.eye.x + 10, camera.eye.y, camera.eye.z);
-//             args->scene->set_camera(Camera(camera.look_at, eye, camera.view_up, camera.focal_distance, camera.window.width, camera.window.height, camera.window.cols, camera.window.rows));
-//             // args->camera->eye.apply_transformation(MatrixTransformations::translation(10,1,1));
-//             // args->camera->eye.print();
-//             // args->camera->window.should_update = true;
-//         }
-//         // cout << val;
-//         hasval = 2;
-//         return 0;
-//     }
-
-// public:
-//     static bool begininput(Scene* scene)
-//     {
-//         if (hasval != 0)
-//             return false;
-
-//         hasval = 1;
-
-//         ThreadArgs args = {scene};
-//         SDL_CreateThread(thread, "ConsoleInput", &args);
-//         return true;
-//     }
-//     static bool hasinput()
-//     {
-//         return hasval == 2;
-//     }
-//     static std::string reapinput()
-//     {
-//         hasval = false;
-//         return val;
-//     }
-// };
-
-// int AsyncCin::hasval = 0;
-// std::string AsyncCin::val = "";
 
 void run_tests();
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height);
 
 int main(int argc, char *argv[])
 {
-    float window_width = 60;
-    float window_height = 60;
-    // window width and height will be 1.0 meter. We will render everything in a SDL window with pixes specified.
+    float width_and_height = 150;
     run_tests();
-    // thread t()
-    thread t(render_picture, 500, 500, 500, 500, window_width, window_height);
 
-    t.join();
-    // t.
-    return 1;
+    return render_picture(500,500,500,500, width_and_height, width_and_height);
 }
 
 int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float window_width, float window_height)
 {
-    Vector3d look_at(400, 100, -200);
-    Vector3d view_up(-390, 1000000, -100);
-    Vector3d eye(-390, 100, -100);
-    float focal_distance = 1;
+    Vector3d look_at(0, 20, -100);
+    Vector3d view_up(0, 1000000, -100);
+    Vector3d eye(-399, 100, -100);
+    float focal_distance = 5;
 
-    Camera camera(look_at, eye, view_up, focal_distance, window_width, window_height, n_cols, n_rows);
+    Camera* camera = new Camera(look_at, eye, view_up, focal_distance, window_width, window_height, n_cols, n_rows);
     // Window *cretos_window = new Window(window_width, window_height, n_cols, n_rows, 0, 0, -30);
     float width_ratio = 1;  // sdl_width / (float)n_cols;
     float height_ratio = 1; // sdl_height / (float)n_rows;
@@ -130,7 +69,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     Plan *left_plan = new Plan(Vector3d(-400, 0, -100), Vector3d(1, 0, 0), back_plan_k_difuse, back_plan_k_specular, back_plan_k_environment, 1, Color(0, 255, 0));
     Plan *right_plan = new Plan(Vector3d(400, 0, -100), Vector3d(-1, 0, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
     Plan *front_plan = new Plan(Vector3d(0, 0, 0), Vector3d(0, 0, -1), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
-    Plan *roof_plan = new Plan(Vector3d(0, 400, 0), Vector3d(0, -1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
+    Plan *roof_plan = new Plan(Vector3d(0, 300, 0), Vector3d(0, -1, 0), floor_plan_k_difuse, floor_plan_k_specular, floor_plan_k_environment, 1, Color(50, 25, 199));
 
     Sphere *sphere = new Sphere(Vector3d(0, sphere_radius, -100), sphere_radius, Color(222, 0, 0), sphere_k_d, sphere_k_e, sphere_k_a, 10);
     // Triangle *triangle2 = new Triangle(Vector3d(-20, 0, -100), Vector3d(20, 0, -100), Vector3d(0, 20, -100));
@@ -186,15 +125,6 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
     while (isRunning)
     {
-        // // Begin input
-        // AsyncCin::begininput(&scene);
-
-        // // // Check if there is input
-        // if (AsyncCin::hasinput())
-        // {
-        //     AsyncCin::reapinput();
-        // }
-
         // Event listening
         while (SDL_PollEvent(&event))
         {
@@ -202,40 +132,24 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
             {
             case SDL_QUIT:
                 isRunning = false;
-                camera.window.should_update = true;
+                scene.camera->window.should_update = true;
                 break;
             case SDL_KEYDOWN:
                 // Handle key press event
                 if (event.key.keysym.sym == SDLK_1)
                 {
                     cout << "belezaa\n";
+                    cout << scene.camera->window.should_update;
+                    scene.set_eye(Vector3d(-200, eye.y, eye.z));
+                    scene.camera->window.should_update = true;
+                    scene.camera->eye.print();
+                    cout << scene.camera->window.should_update;
                     // Do something when '1' key is pressed
                 }
                 break;
             default:
                 break;
             }
-            // if (event.type == SDL_QUIT)
-            // {
-               
-            // }
-
-            // if (event.type == SDL_KEYUP)
-            // {
-
-            //     // Matrix m = MatrixTransformations::arbitrary_rotation(M_PI/3, Vector3d(0,0,-100), Vector3d(0,20,-100));
-            //     // triangle2->apply_transformation(m);
-
-            //     // sphere->apply_transformation(translation_matrix);
-            //     // triangle2->apply_scale_transformation(1.1, 1.1, 1.1);
-
-            //     // triangle2->apply_transformation(translation_matrix);
-            //     // triangle2->apply_rotation_transformation(M_PI/18, Y_AXIS);
-
-            //     // camera.window.center.z += 0.05;
-            //     // cout << camera.window.center << endl;
-            //     camera.window.should_update = true;
-            // }
         }
 
         // Good practice
@@ -243,14 +157,14 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 
-        // Just draw the colors saved in camera.window.windows_colors
-        if (!camera.window.should_update)
+        // Just draw the colors saved in camera->window.windows_colors
+        if (!scene.camera->window.should_update)
         {
             for (int l = 0; l < n_rows; l++)
             {
                 for (int c = 0; c < n_cols; c++)
                 {
-                    Color color = camera.window.windows_colors[l][c];
+                    Color color = scene.camera->window.windows_colors[l][c];
 
                     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
                     SDL_RenderDrawPointF(renderer, c * width_ratio, l * height_ratio);
@@ -264,22 +178,22 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
         // By default, we will always use Creto's system to calculate, when we need to draw just transform to SDL system
         for (int l = 0; l < n_rows; l++)
         {
-            float y = camera.window.height / 2 - (camera.window.dy / 2) - (camera.window.dy * l); // Creto's system
+            float y = scene.camera->window.height / 2 - (scene.camera->window.dy / 2) - (scene.camera->window.dy * l); // Creto's system
 
             for (int c = 0; c < n_cols; c++)
             {
-                float x = -camera.window.width / 2 + (camera.window.dx / 2) + (camera.window.dx * c); // Creto's system
+                float x = -scene.camera->window.width / 2 + (scene.camera->window.dx / 2) + (scene.camera->window.dx * c); // Creto's system
 
                 center_of_small_rectangle->x = x;
                 center_of_small_rectangle->y = y;
-                center_of_small_rectangle->z = camera.window.center.z;
+                center_of_small_rectangle->z = scene.camera->window.center.z;
 
-                ray->p1 = Vector3d(0, 0, 0); // Eye in Camera's system
+                ray->p1 = Vector3d(0, 0, 0); // Eye in Camera->s system
                 ray->p2 = *center_of_small_rectangle;
 
-                camera.window.windows_colors[l][c] = scene.get_color_to_draw(*ray);
+                camera->window.windows_colors[l][c] = scene.get_color_to_draw(*ray);
 
-                Color color = camera.window.windows_colors[l][c];
+                Color color = camera->window.windows_colors[l][c];
 
                 SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
                 SDL_RenderDrawPointF(renderer, c * width_ratio, l * height_ratio);
@@ -288,7 +202,7 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
 
         // Lastly, we update the window with the renderer we just painted
         SDL_RenderPresent(renderer);
-        camera.window.should_update = false;
+        camera->window.should_update = false;
     }
 
     // Free the memory

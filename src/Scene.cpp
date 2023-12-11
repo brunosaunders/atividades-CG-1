@@ -65,7 +65,7 @@ Color Scene::get_color_to_draw(Ray ray)
     }
 
     IntensityColor difuse_contrib = obj->get_difuse_contribution(intersection_point, intersection_min, source_of_light);
-    IntensityColor specular_contrib = obj->get_specular_contribution(intersection_point, intersection_min, this->camera.eye, source_of_light);
+    IntensityColor specular_contrib = obj->get_specular_contribution(intersection_point, intersection_min, this->camera->eye, source_of_light);
     IntensityColor environment_contrib = this->environment_light.arroba_multiply(obj->environment_reflectivity);
 
     IntensityColor result = environment_contrib.sum(difuse_contrib).sum(specular_contrib);
@@ -84,33 +84,30 @@ void Scene::dealloc_objects()
 }
 
 
-Scene::Scene(Color bg_color, SourceOfLight source, IntensityColor environment_light, Camera camera)
+Scene::Scene(Color bg_color, SourceOfLight source, IntensityColor environment_light, Camera* camera)
         : background_color(bg_color), source_of_light(source), environment_light(environment_light), coordinates_type(WORLD_COORDINATES) {
     this->set_camera(camera);
 }
 
-
-Camera Scene::get_camera() {
-    return this->camera;
-}
-
-
 void Scene::push_object(Object *obj)
 {
-    obj->apply_coordinate_change(this->camera, CHANGE_FROM_WORLD_TO_CAMERA);
+    obj->apply_coordinate_change(*this->camera, CHANGE_FROM_WORLD_TO_CAMERA);
     objects.push_back(obj);
 }
 
+void Scene::set_eye(Vector3d eye) {
+    this->camera->set_eye(eye);
+    calculate_everything();
+}
 
-void Scene::set_camera(Camera camera) {
-    cout << "eae";
-    camera.window.should_update = true; // Please check if we have to pass camera as reference.
+void Scene::calculate_everything() {
+    camera->window.should_update = true; // Please check if we have to pass camera as reference.
 
     // Apply Camera matrix(W->C) to each object
     if (this->coordinates_type == WORLD_COORDINATES) {
         for (auto& obj : this->objects) {
             cout << "oba";
-            obj->apply_coordinate_change(camera, CHANGE_FROM_WORLD_TO_CAMERA);
+            obj->apply_coordinate_change(*camera, CHANGE_FROM_WORLD_TO_CAMERA);
         }
         this->camera = camera;
         this->coordinates_type = CAMERA_COORDINATES;
@@ -120,10 +117,33 @@ void Scene::set_camera(Camera camera) {
     // Apply Old Camera matrix(C->W) to each object
     // Apply New Camera matrix(W->C) to each object
     for (auto& obj : this->objects) {
-        obj->apply_coordinate_change(this->camera, CHANGE_FROM_CAMERA_TO_WORLD); // Old camera
-        obj->apply_coordinate_change(camera, CHANGE_FROM_WORLD_TO_CAMERA); // New camera
+        obj->apply_coordinate_change(*this->camera, CHANGE_FROM_CAMERA_TO_WORLD); // Old camera
+        obj->apply_coordinate_change(*camera, CHANGE_FROM_WORLD_TO_CAMERA); // New camera
+    }
+}
+
+void Scene::set_camera(Camera* camera) {
+    cout << "eae";
+    camera->window.should_update = true; // Please check if we have to pass camera as reference.
+
+    // Apply Camera matrix(W->C) to each object
+    if (this->coordinates_type == WORLD_COORDINATES) {
+        for (auto& obj : this->objects) {
+            cout << "oba";
+            obj->apply_coordinate_change(*camera, CHANGE_FROM_WORLD_TO_CAMERA);
+        }
+        this->camera = camera;
+        this->coordinates_type = CAMERA_COORDINATES;
+        return;
     }
 
-    this->camera.destroy();
+    // Apply Old Camera matrix(C->W) to each object
+    // Apply New Camera matrix(W->C) to each object
+    for (auto& obj : this->objects) {
+        obj->apply_coordinate_change(*this->camera, CHANGE_FROM_CAMERA_TO_WORLD); // Old camera
+        obj->apply_coordinate_change(*camera, CHANGE_FROM_WORLD_TO_CAMERA); // New camera
+    }
+
+    this->camera->destroy();
     this->camera = camera;
 }

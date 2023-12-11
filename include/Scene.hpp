@@ -22,9 +22,8 @@ namespace atividades_cg_1::scene {
 
     class Scene
     {
-    protected:
-        Camera camera;
     public:
+        Camera* camera;
         std::vector<Object *> objects;
         int coordinates_type;
         Color background_color;
@@ -32,7 +31,7 @@ namespace atividades_cg_1::scene {
         IntensityColor environment_light;
 
 
-        Scene(Color bg_color, SourceOfLight source, IntensityColor environment_light, Camera camera);
+        Scene(Color bg_color, SourceOfLight source, IntensityColor environment_light, Camera *camera);
        
         void push_object(Object *obj);
 
@@ -41,8 +40,9 @@ namespace atividades_cg_1::scene {
         void dealloc_objects();
 
         /* Transformations: C->W (old camera) and then W->C (new camera)*/
-        void set_camera(Camera camera);
-
+        void set_camera(Camera* camera);
+        void set_eye(Vector3d eye);
+        void calculate_everything();
         Camera get_camera();
     };
 }

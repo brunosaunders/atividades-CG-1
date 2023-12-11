@@ -51,12 +51,16 @@ namespace atividades_cg_1::camera {
             Window window;
 
             Camera(){}
+            Camera(Vector3d look_at, Vector3d eye, Vector3d view_up, float d, Window window);
             Camera(Vector3d look_at, Vector3d eye, Vector3d view_up, float d, float width, 
             float height, int cols, int rows);
 
             Vector3d transform_vector_from_world_to_camera(Vector3d v);
             Vector3d transform_vector_from_camera_to_world(Vector3d v);
             void destroy();
+            void calculate_everything();
+            void set_eye(Vector3d eye);
+            void set_look_at(Vector3d look_at);
 
     };
 }

@@ -4,43 +4,70 @@
 
 using namespace atividades_cg_1::camera;
 
+void Camera::calculate_everything()
+{
+    this->kc = this->eye.minus(this->look_at).get_vector_normalized();
+    this->ic = this->view_up.vectorial_product(this->kc).get_vector_normalized();
+    this->jc = this->kc.vectorial_product(this->ic);
+
+    this->camera_to_world = new Matrix(vector<vector<float>>{
+        vector<float>{this->ic.x, this->ic.y, this->ic.z, -this->ic.scalar_product(this->eye)},
+        vector<float>{this->jc.x, this->jc.y, this->jc.z, -this->jc.scalar_product(this->eye)},
+        vector<float>{this->kc.x, this->kc.y, this->kc.z, -this->kc.scalar_product(this->eye)},
+        vector<float>{0, 0, 0, 1.0}});
+
+    this->world_to_camera = new Matrix(vector<vector<float>>{
+        vector<float>{this->ic.x, this->jc.x, this->kc.x, this->eye.x},
+        vector<float>{this->ic.y, this->jc.y, this->kc.y, this->eye.y},
+        vector<float>{this->ic.z, this->jc.z, this->kc.z, this->eye.z},
+        vector<float>{0, 0, 0, 1.0}});
+
+    this->window.should_update = true;
+    cout << "sss";
+}
+
+Camera::Camera(Vector3d look_at, Vector3d eye, Vector3d view_up, float d, Window window) : look_at(look_at), eye(eye), focal_distance(d)
+{
+    this->view_up = view_up;
+    this->window = window;
+
+    this->calculate_everything();
+}
+
 Camera::Camera(Vector3d look_at, Vector3d eye, Vector3d view_up, float d, float width,
                float height, int cols, int rows) : look_at(look_at), eye(eye), focal_distance(d)
 {
     this->view_up = view_up;
     this->window = Window(width, height, cols, rows, eye.x, eye.y, eye.z - d);
 
-    this->kc = eye.minus(look_at).get_vector_normalized();
-    this->ic = view_up.vectorial_product(kc).get_vector_normalized();
-    this->jc = kc.vectorial_product(ic);
-
-    this->camera_to_world = new Matrix(vector<vector<float>>{
-        vector<float>{this->ic.x, this->ic.y, this->ic.z, - this->ic.scalar_product(eye)},
-        vector<float>{this->jc.x, this->jc.y, this->jc.z, - this->jc.scalar_product(eye)},
-        vector<float>{this->kc.x, this->kc.y, this->kc.z, - this->kc.scalar_product(eye)},
-        vector<float>{0,0,0,1.0}
-        });
-
-    this->world_to_camera = new Matrix(vector<vector<float>>{
-        vector<float>{this->ic.x, this->jc.x, this->kc.x, eye.x},
-        vector<float>{this->ic.y, this->jc.y, this->kc.y, eye.y},
-        vector<float>{this->ic.z, this->jc.z, this->kc.z, eye.z},
-        vector<float>{0,0,0,1.0}
-    });
+    this->calculate_everything();
 }
 
+void Camera::set_eye(Vector3d eye)
+{
+    cout << "ow ";
+    this->eye = eye;
+    this->calculate_everything();
+}
 
-Vector3d Camera::transform_vector_from_world_to_camera(Vector3d v) {
+void Camera::set_look_at(Vector3d look_at)
+{
+    this->look_at = look_at;
+    this->calculate_everything();
+}
+
+Vector3d Camera::transform_vector_from_world_to_camera(Vector3d v)
+{
     return this->camera_to_world->multiply(v.as_matrix()).as_vector();
 }
 
-
-Vector3d Camera::transform_vector_from_camera_to_world(Vector3d v) {
+Vector3d Camera::transform_vector_from_camera_to_world(Vector3d v)
+{
     return this->world_to_camera->multiply(v.as_matrix()).as_vector();
 }
 
-
-void Camera::destroy() {
+void Camera::destroy()
+{
     delete this->camera_to_world;
     delete this->world_to_camera;
 }
