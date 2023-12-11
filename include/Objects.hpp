@@ -179,6 +179,27 @@ namespace atividades_cg_1::objects {
             Intersection get_intersection(Ray ray) override;
             
     };
+
+    class Cylinder: public Object {
+    public:
+        Vector3d base_center;
+        Vector3d top_center;
+        float radius;
+
+        Cylinder() {}
+        Cylinder(Vector3d base_center, Vector3d top_center, float radius, Color color, 
+            IntensityColor dr=IntensityColor(.7, .7, .7), IntensityColor sr=IntensityColor(.7, .7, .7),
+            IntensityColor er=IntensityColor(.7, .7, .7), float shininess=10);
+
+        Vector3d get_normal_vector(Vector3d intersection_point, Intersection Intersection) override;
+
+        Intersection get_intersection(Ray ray) override;
+
+        Vector3d get_cylinder_dr();
+        float get_height(); 
+        // Vector3d get_center() override;
+    };
+
 }
 
 #endif

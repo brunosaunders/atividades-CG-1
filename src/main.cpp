@@ -81,9 +81,11 @@ int render_picture(int n_rows, int n_cols, int sdl_width, int sdl_height, float 
     scene.push_object(right_plan);
     scene.push_object(front_plan);
     scene.push_object(roof_plan);
+    scene.push_object(new Cylinder(Vector3d(-220,-70,-500), Vector3d(-220,60,-500), 30, Color(150,150,150)));
 
-    Mesh *cube = ObjFactory::create_cube();
-    scene.push_object(cube);
+
+    // Mesh *cube = ObjFactory::create_cube();
+    // scene.push_object(cube);
 
     // Initialize library
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
